@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -16,6 +18,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -31,10 +35,23 @@ public class MainActivity extends AppCompatActivity {
     private String languageEnglish = "en-US";
     private String pageOne = "1";
 
+    private MovieAdapter movieAdapter;
+
+    @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        movieListRecyclerView.setLayoutManager(layoutManager);
+        movieListRecyclerView.setHasFixedSize(true);
+
+        movieAdapter = new MovieAdapter(this);
+        movieListRecyclerView.setAdapter(movieAdapter);
+
         loadMovieList();
     }
 
@@ -108,17 +125,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-
             }
-
             return movies;
         }
-
-
 
         @Override
         protected void onPostExecute(List<Movie> movies) {
             Log.i(TAG, movies.toString());
+            movieAdapter.setMovies(movies);
         }
     }
 }
