@@ -1,10 +1,12 @@
 package com.shane.popularmovies;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
@@ -24,7 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler{
     private static String TAG = MainActivity.class.getSimpleName();
 
     final static String MOVIE_BASE_URL = "https://api.themoviedb.org/3/movie/popular";
@@ -45,11 +47,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         movieListRecyclerView.setLayoutManager(layoutManager);
         movieListRecyclerView.setHasFixedSize(true);
 
-        movieAdapter = new MovieAdapter(this);
+        movieAdapter = new MovieAdapter(this, this);
         movieListRecyclerView.setAdapter(movieAdapter);
 
         loadMovieList();
@@ -77,10 +79,16 @@ public class MainActivity extends AppCompatActivity {
         return url;
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
+    @Override
+    public void onClick(@NonNull Movie movie) {
+        final Intent intent = new Intent(MainActivity.this, MovieDetailActivity.class);
+        intent.putExtra(Constants.EXTRA_MOVIE, movie);
+        startActivity(intent);
+    }
 
-        public FetchMoviesTask() {
-        }
+    private class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
+
+        FetchMoviesTask() {}
 
         @Override
         protected void onPreExecute() {
@@ -93,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (urls.length == 0) return movies;
             String url = urls[0];
+
+            Log.i(TAG, url);
+
             final OkHttpClient client = new OkHttpClient();
 
             Request request = new Request.Builder()

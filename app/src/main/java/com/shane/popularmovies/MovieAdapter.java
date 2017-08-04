@@ -1,12 +1,12 @@
 package com.shane.popularmovies;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -22,12 +22,23 @@ import butterknife.ButterKnife;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
+    private final Context context;
+    private MovieAdapterOnClickHandler clickHandler;
     private List<Movie> movies;
-    private Context context;
 
-    public MovieAdapter(Context context) {
-        movies = new ArrayList<>();
+
+    public interface MovieAdapterOnClickHandler {
+        void onClick(Movie movie);
+    }
+
+    public MovieAdapter(@NonNull Context context, @NonNull MovieAdapterOnClickHandler clickHandler, @NonNull List<Movie> movies) {
         this.context = context;
+        this.clickHandler = clickHandler;
+        this.movies = movies;
+    }
+
+    public MovieAdapter(@NonNull Context context, @NonNull MovieAdapterOnClickHandler clickHandler) {
+        this(context, clickHandler, new ArrayList<Movie>());
     }
 
     public void setMovies(List<Movie> newMovieList) {
@@ -47,11 +58,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         Movie movie = movies.get(position);
-        holder.title.setText(movie.getTitle());
-        holder.synopsis.setText(movie.getSynopsis());
-        Picasso.with(context)
-                .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
-                .into(holder.poster);
+        holder.bind(movie);
     }
 
     @Override
@@ -60,13 +67,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.title_text_view) TextView title;
-        @BindView(R.id.synopsis_text_view) TextView synopsis;
-        @BindView(R.id.poster_image_view) ImageView poster;
+        @BindView(R.id.poster_image_view) ImageView posterImageView;
 
-        public MovieViewHolder(View itemView) {
+        private Context context;
+
+        MovieViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            context = itemView.getContext();
+        }
+
+        void bind(@NonNull Movie movie) {
+            Picasso.with(context)
+                    .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
+                    .into(posterImageView);
         }
     }
 }
