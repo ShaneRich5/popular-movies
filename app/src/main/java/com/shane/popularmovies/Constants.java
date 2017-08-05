@@ -6,7 +6,7 @@ package com.shane.popularmovies;
 
 public class Constants {
     private Constants() {
-        throw new UnsupportedOperationException("Cannon instantiate class");
+        throw new AssertionError("Cannon instantiate class");
     }
 
     public static final String EXTRA_MOVIE = "EXTRA_MOVIE";

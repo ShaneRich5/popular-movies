@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -40,12 +41,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private MovieAdapter movieAdapter;
 
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
 
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         movieListRecyclerView.setLayoutManager(layoutManager);
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private void loadMovieList() {
         final URL url = buildUrl();
         if (url == null) return;
+        toolbar.setTitle("Popular");
         new FetchMoviesTask().execute(url.toString());
     }
 

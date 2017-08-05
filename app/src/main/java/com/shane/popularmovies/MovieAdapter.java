@@ -66,7 +66,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return movies.size();
     }
 
-    class MovieViewHolder extends RecyclerView.ViewHolder {
+    class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.poster_image_view) ImageView posterImageView;
 
         private Context context;
@@ -75,12 +75,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             super(itemView);
             ButterKnife.bind(this, itemView);
             context = itemView.getContext();
+            itemView.setOnClickListener(this);
         }
 
         void bind(@NonNull Movie movie) {
             Picasso.with(context)
                     .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
                     .into(posterImageView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            final int index = getAdapterPosition();
+            final Movie movie = movies.get(index);
+            clickHandler.onClick(movie);
         }
     }
 }
