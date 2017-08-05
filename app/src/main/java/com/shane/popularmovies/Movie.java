@@ -3,17 +3,19 @@ package com.shane.popularmovies;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Shane on 8/1/2017.
  */
 
 public class Movie implements Parcelable {
-    private int id;
-    private String title;
-    private String posterPath;
-    private String synopsis;
-    private double rating;
-    private String releaseDate;
+    @SerializedName("id") private int id;
+    @SerializedName("title") private String title;
+    @SerializedName("poster_path") private String posterPath;
+    @SerializedName("overview") private String synopsis;
+    @SerializedName("vote_average") private double rating;
+    @SerializedName("release_date") private String releaseDate;
 
     public Movie(int id, String title, String posterPath, String synopsis, double rating, String releaseDate) {
         this.id = id;

@@ -9,7 +9,7 @@ import java.util.List;
  */
 
 public class MovieResponse {
-    private int page;
+    @SerializedName("page") private int page;
     @SerializedName("total_results") private int totalResults;
     @SerializedName("total_pages") private int totalPages;
     @SerializedName("results") private List<Movie> movies;
