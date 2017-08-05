@@ -26,7 +26,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private MovieAdapterOnClickHandler clickHandler;
     private List<Movie> movies;
 
-
     public interface MovieAdapterOnClickHandler {
         void onClick(Movie movie);
     }
@@ -41,8 +40,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         this(context, clickHandler, new ArrayList<Movie>());
     }
 
-    public void setMovies(List<Movie> newMovieList) {
+    public void setMovies(@NonNull List<Movie> newMovieList) {
         movies = newMovieList;
+        notifyDataSetChanged();
+    }
+
+
+    public void addMovies(@NonNull List<Movie> movies) {
+        this.movies.addAll(movies);
         notifyDataSetChanged();
     }
 
