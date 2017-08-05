@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,10 +6,16 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.shane.popularmovies.utils.Constants;
+import com.shane.popularmovies.models.Movie;
+import com.shane.popularmovies.adapters.MovieAdapter;
+import com.shane.popularmovies.R;
+import com.shane.popularmovies.fragments.MovieListFragment;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler{
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
     private static String TAG = MainActivity.class.getSimpleName();
 
     private MovieListFragment movieListFragment;

@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/label_main_activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,13 +21,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MovieDetailActivity"
-            android:parentActivityName=".MainActivity"
+            android:name=".activities.MovieDetailActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:label="@string/label_movie_detail_activity"
             tools:targetApi="jelly_bean">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".activities.MainActivity"/>
         </activity>
     </application>
 

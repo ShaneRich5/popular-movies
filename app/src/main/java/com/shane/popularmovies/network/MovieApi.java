@@ -1,9 +1,10 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.network;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.shane.popularmovies.models.MovieResponse;
 
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ public interface MovieApi {
     Observable<MovieResponse> listTopRatedMovies(@Query("page") Integer page);
 
     class Factory {
-        static MovieApi create(@NonNull String apiKey) {
+        public static MovieApi create(@NonNull String apiKey) {
             final OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(new TokenInterceptor(apiKey))
                     .build();
@@ -47,7 +48,7 @@ public interface MovieApi {
         }
     }
 
-     final class TokenInterceptor implements Interceptor {
+    final class TokenInterceptor implements Interceptor {
         private final String token;
 
         TokenInterceptor(@NonNull String token) {

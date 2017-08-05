@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.fragments;
 
 
 import android.os.Bundle;
@@ -12,6 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.shane.popularmovies.listeners.EndlessRecyclerOnScrollListener;
+import com.shane.popularmovies.adapters.MovieAdapter;
+import com.shane.popularmovies.network.MovieApi;
+import com.shane.popularmovies.repositories.MovieApiRepository;
+import com.shane.popularmovies.repositories.MovieRepository;
+import com.shane.popularmovies.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

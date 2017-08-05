@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +8,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
+
+import com.shane.popularmovies.utils.Constants;
+import com.shane.popularmovies.models.Movie;
+import com.shane.popularmovies.R;
+import com.shane.popularmovies.fragments.MovieFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

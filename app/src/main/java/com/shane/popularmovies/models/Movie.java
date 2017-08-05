@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

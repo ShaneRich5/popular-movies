@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.utils;
 
 /**
  * Created by Shane on 8/4/2017.

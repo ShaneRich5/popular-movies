@@ -1,4 +1,6 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.repositories;
+
+import com.shane.popularmovies.models.Movie;
 
 import java.util.List;
 

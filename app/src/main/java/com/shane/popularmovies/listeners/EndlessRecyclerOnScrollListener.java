@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.listeners;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
