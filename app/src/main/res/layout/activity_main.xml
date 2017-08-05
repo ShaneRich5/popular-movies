@@ -15,12 +15,15 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+    <fragment
+        android:id="@+id/fragment_movie_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.shane.popularmovies.MovieListFragment" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/movie_list_recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/toolbar"
-        tools:layout_editor_absoluteX="172dp" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

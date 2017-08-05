@@ -6,8 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
@@ -38,9 +36,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private String languageEnglish = "en-US";
     private String pageOne = "1";
 
-    private MovieAdapter movieAdapter;
+    private MovieListFragment movieListFragment;
 
-    @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
@@ -49,14 +46,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
-        movieListRecyclerView.setLayoutManager(layoutManager);
-        movieListRecyclerView.setHasFixedSize(true);
-
-        movieAdapter = new MovieAdapter(this, this);
-        movieListRecyclerView.setAdapter(movieAdapter);
-
+        movieListFragment = (MovieListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_movie_list);
         loadMovieList();
     }
 
@@ -147,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected void onPostExecute(List<Movie> movies) {
             Log.i(TAG, movies.toString());
-            movieAdapter.setMovies(movies);
+            movieListFragment.setMovies(movies);
         }
     }
 }
