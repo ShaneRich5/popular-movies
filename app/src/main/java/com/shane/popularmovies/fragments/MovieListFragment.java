@@ -34,11 +34,12 @@ import io.reactivex.annotations.NonNull;
 public class MovieListFragment extends Fragment {
     public static String TAG = MovieListFragment.class.getSimpleName();
 
-    public static String POPULAR_SORT_ORDER = "popular";
-    public static String TOP_RATED_SORT_ORDER = "top_rated";
+    public static final String POPULAR_SORT_ORDER = "popular";
+    public static final String TOP_RATED_SORT_ORDER = "top_rated";
 
     private MovieAdapter movieAdapter;
     private MovieRepository movieRepository;
+    private EndlessRecyclerOnScrollListener scrollListener;
 
     private String sortOrder = POPULAR_SORT_ORDER;
 
@@ -46,8 +47,6 @@ public class MovieListFragment extends Fragment {
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
     @BindView(R.id.error_layout) ConstraintLayout errorLayout;
-
-    private EndlessRecyclerOnScrollListener scrollListener;
 
     public MovieListFragment() {}
 

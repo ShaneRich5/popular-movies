@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.squareup.leakcanary.LeakCanary;
 
+import timber.log.Timber;
+
 /**
  * Created by Shane on 8/7/2017.
  */
@@ -18,5 +20,9 @@ public class PopularMoviesApp extends Application {
             return;
         }
         LeakCanary.install(this);
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
     }
 }
