@@ -9,10 +9,19 @@
     </style>
 
     <style name="Toolbar">
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/white</item>
-        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="actionMenuTextColor">@color/white</item>
+    </style>
+
+    <style name="SortSpinnerItem" parent="android:Widget.TextView.SpinnerItem">
+
+    </style>
+
+    <style name="SortSpinnerDropDownItem" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+        <item name="android:background">@color/white</item>
+        <item name="android:padding">8dp</item>
     </style>
 
 </resources>
