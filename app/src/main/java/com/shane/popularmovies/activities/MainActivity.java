@@ -6,11 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import com.shane.popularmovies.utils.Constants;
-import com.shane.popularmovies.models.Movie;
-import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.R;
+import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.fragments.MovieListFragment;
+import com.shane.popularmovies.models.Movie;
+import com.shane.popularmovies.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

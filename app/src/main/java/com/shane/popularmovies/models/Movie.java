@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import static android.R.attr.rating;
+
 /**
  * Created by Shane on 8/1/2017.
  */
@@ -14,15 +16,15 @@ public class Movie implements Parcelable {
     @SerializedName("title") private String title;
     @SerializedName("poster_path") private String posterPath;
     @SerializedName("overview") private String synopsis;
-    @SerializedName("vote_average") private double rating;
+    @SerializedName("vote_average") private double ratings;
     @SerializedName("release_date") private String releaseDate;
 
-    public Movie(int id, String title, String posterPath, String synopsis, double rating, String releaseDate) {
+    public Movie(int id, String title, String posterPath, String synopsis, double ratings, String releaseDate) {
         this.id = id;
         this.title = title;
         this.posterPath = posterPath;
         this.synopsis = synopsis;
-        this.rating = rating;
+        this.ratings = ratings;
         this.releaseDate = releaseDate;
     }
 
@@ -58,12 +60,12 @@ public class Movie implements Parcelable {
         this.synopsis = synopsis;
     }
 
-    public double getRating() {
-        return rating;
+    public double getRatings() {
+        return ratings;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setRatings(double ratings) {
+        this.ratings = ratings;
     }
 
     public String getReleaseDate() {
@@ -85,7 +87,7 @@ public class Movie implements Parcelable {
         out.writeString(title);
         out.writeString(posterPath);
         out.writeString(synopsis);
-        out.writeDouble(rating);
+        out.writeDouble(ratings);
         out.writeString(releaseDate);
     }
 
@@ -107,7 +109,7 @@ public class Movie implements Parcelable {
         title = in.readString();
         posterPath = in.readString();
         synopsis = in.readString();
-        rating = in.readDouble();
+        ratings = in.readDouble();
         releaseDate = in.readString();
     }
 }

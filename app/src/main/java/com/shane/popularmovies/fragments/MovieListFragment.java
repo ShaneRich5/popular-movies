@@ -3,6 +3,7 @@ package com.shane.popularmovies.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,21 +14,22 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.shane.popularmovies.listeners.EndlessRecyclerOnScrollListener;
+import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
+import com.shane.popularmovies.listeners.EndlessRecyclerOnScrollListener;
+import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
-import com.shane.popularmovies.R;
+
+import java.net.UnknownHostException;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.annotations.NonNull;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class MovieListFragment extends Fragment {
     private String TAG = MovieListFragment.class.getSimpleName();
 
@@ -37,6 +39,7 @@ public class MovieListFragment extends Fragment {
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
+    @BindView(R.id.error_layout) ConstraintLayout errorLayout;
 
     public MovieListFragment() {}
 
@@ -69,30 +72,48 @@ public class MovieListFragment extends Fragment {
         movieListRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
-                movieRepository.fetchPopularMovies(currentPage)
-                        .subscribe(
-                                movies -> {
-                                    movieAdapter.addMovies(movies);
-                                },
-                                error-> {
-                                    Log.e(TAG, error.getMessage());
-                                }
-                        );
+                loadMovies(currentPage);
             }
         });
 
-        movieRepository.fetchPopularMovies(1)
-                .doOnSubscribe(disposable -> showLoading())
-                .subscribe(movies -> {
-                            movieListRecyclerView.setVisibility(View.VISIBLE);
-                            movieAdapter.setMovies(movies);
-                        },
-                        error -> showErrorMessage(error.getMessage()),
-                        () -> loadingProgressBar.setVisibility(View.GONE));
+        loadMoviesOnFirstPage();
     }
 
-    private void loadMoviesOnPage(int currentPage) {
+    private void loadMoviesOnFirstPage() {
+        loadMovies(1);
+    }
 
+    private void loadMovies(int page) {
+        movieRepository.fetchPopularMovies(page)
+                .doOnSubscribe(disposable -> displayLoadingStatus(page))
+                .subscribe(
+                        movies -> this.handleMoviesLoaded(movies, page),
+                        this::handlerLoadingError,
+                        this::handleLoadingComplete);
+    }
+
+    private void displayLoadingStatus(int page) {
+        if (page == 1)
+            showLoading();
+    }
+
+    private void handleLoadingComplete() {
+        loadingProgressBar.setVisibility(View.GONE);
+    }
+
+    private void handleMoviesLoaded(@NonNull List<Movie> movies, int page) {
+        movieListRecyclerView.setVisibility(View.VISIBLE);
+        if (page == 1) movieAdapter.setMovies(movies);
+        else movieAdapter.addMovies(movies);
+    }
+
+    private void handlerLoadingError(@NonNull Throwable error) {
+        if (error instanceof UnknownHostException) {
+            showErrorMessage("Please connect to the internet");
+        } else {
+            showErrorMessage(error.getMessage());
+        }
+        error.printStackTrace();
     }
 
     private void showErrorMessage(@NonNull String message) {
@@ -100,13 +121,13 @@ public class MovieListFragment extends Fragment {
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
-        errorMessageTextView.setVisibility(View.VISIBLE);
+        errorLayout.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {
         Log.i(TAG, "Loading movies");
         loadingProgressBar.setVisibility(View.VISIBLE);
         movieListRecyclerView.setVisibility(View.GONE);
-        errorMessageTextView.setVisibility(View.GONE);
+        errorLayout.setVisibility(View.GONE);
     }
 }

@@ -1,12 +1,42 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.shane.popularmovies.fragments.MovieFragment">
 
-    <TextView
-        android:id="@+id/"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <ImageView
+        android:id="@+id/poster_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:transitionName="poster"
+        android:contentDescription="@string/movie_poster_description"
+        tools:targetApi="lollipop" />
 
-</FrameLayout>
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/title_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/synopsis_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_date_range_grey_700_24dp"
+        android:drawableStart="@drawable/ic_date_range_grey_700_24dp"/>
+
+    <TextView
+        android:id="@+id/ratings_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/release_data_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
