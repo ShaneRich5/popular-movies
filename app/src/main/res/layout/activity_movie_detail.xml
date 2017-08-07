@@ -6,8 +6,6 @@
     android:orientation="vertical"
     tools:context="com.shane.popularmovies.activities.MovieDetailActivity">
 
-    <include layout="@layout/partial_toolbar"/>
-
     <fragment
         android:id="@+id/fragment_movie"
         android:layout_width="match_parent"

@@ -13,8 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.MainActivity"
-            android:label="@string/label_main_activity">
+            android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,7 +22,6 @@
         <activity
             android:name=".activities.MovieDetailActivity"
             android:parentActivityName=".activities.MainActivity"
-            android:label="@string/label_movie_detail_activity"
             tools:targetApi="jelly_bean">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
