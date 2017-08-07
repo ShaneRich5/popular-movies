@@ -23,7 +23,6 @@ public class MovieFragment extends Fragment {
     public static final String TAG = MovieFragment.class.getSimpleName();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.title_text_view) TextView titleTextView;
     @BindView(R.id.poster_image_view) ImageView posterImageView;
     @BindView(R.id.ratings_text_view) TextView ratingsTextView;
     @BindView(R.id.synopsis_text_view) TextView synopsisTextView;
@@ -55,13 +54,12 @@ public class MovieFragment extends Fragment {
 
     public void setMovie(@NonNull Movie movie) {
         toolbar.setTitle(movie.getTitle());
-        titleTextView.setText(movie.getTitle());
         synopsisTextView.setText(movie.getSynopsis());
         ratingsTextView.setText(String.valueOf(movie.getRatings()));
         releaseDateTextView.setText(movie.getReleaseDate());
 
         Picasso.with(getContext())
-                .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
+                .load("http://image.tmdb.org/t/p/w342/" + movie.getPosterPath())
                 .into(posterImageView);
     }
 }
