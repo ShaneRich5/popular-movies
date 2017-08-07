@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
@@ -54,6 +56,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 .createFromResource(this, R.array.sort_order_array, R.layout.item_sort_option);
 
         adapter.setDropDownViewResource(R.layout.item_sort_by_dropdown);
+        sortOptionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                final String[] sortBy = {
+                        MovieListFragment.POPULAR_SORT_ORDER,
+                        MovieListFragment.TOP_RATED_SORT_ORDER
+                };
+
+                movieListFragment.sortOrderChanged(sortBy[i]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
 
         sortOptionsSpinner.setAdapter(adapter);
 

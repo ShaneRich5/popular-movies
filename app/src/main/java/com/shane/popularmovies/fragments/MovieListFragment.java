@@ -27,19 +27,27 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
 
 
 public class MovieListFragment extends Fragment {
-    private String TAG = MovieListFragment.class.getSimpleName();
+    public static String TAG = MovieListFragment.class.getSimpleName();
+
+    public static String POPULAR_SORT_ORDER = "popular";
+    public static String TOP_RATED_SORT_ORDER = "top_rated";
 
     private MovieAdapter movieAdapter;
     private MovieRepository movieRepository;
+
+    private String sortOrder = POPULAR_SORT_ORDER;
 
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
     @BindView(R.id.error_layout) ConstraintLayout errorLayout;
+
+    private EndlessRecyclerOnScrollListener scrollListener;
 
     public MovieListFragment() {}
 
@@ -69,13 +77,14 @@ public class MovieListFragment extends Fragment {
         movieAdapter = new MovieAdapter(getContext(), (MovieAdapter.MovieAdapterOnClickHandler) getActivity());
         movieListRecyclerView.setAdapter(movieAdapter);
 
-        movieListRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(gridLayoutManager) {
+        scrollListener = new EndlessRecyclerOnScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
                 loadMovies(currentPage);
             }
-        });
+        };
 
+        movieListRecyclerView.addOnScrollListener(scrollListener);
         loadMoviesOnFirstPage();
     }
 
@@ -83,18 +92,28 @@ public class MovieListFragment extends Fragment {
         loadMovies(1);
     }
 
+    public void sortOrderChanged(@NonNull String newSortOrder) {
+        if (sortOrder.equals(newSortOrder)) return;
+        sortOrder = newSortOrder;
+        movieAdapter.clearMovies();
+        scrollListener.reset();
+        loadMoviesOnFirstPage();
+    }
+
     private void loadMovies(int page) {
-        movieRepository.fetchPopularMovies(page)
-                .doOnSubscribe(disposable -> displayLoadingStatus(page))
+        Observable<List<Movie>> observable;
+
+        if (sortOrder.equals(POPULAR_SORT_ORDER)) {
+            observable = movieRepository.fetchPopularMovies(page);
+        } else {
+            observable = movieRepository.fetchTopRatedMovies(page);
+        }
+
+        observable.doOnSubscribe(disposable -> showLoading())
                 .subscribe(
                         movies -> this.handleMoviesLoaded(movies, page),
                         this::handlerLoadingError,
                         this::handleLoadingComplete);
-    }
-
-    private void displayLoadingStatus(int page) {
-        if (page == 1)
-            showLoading();
     }
 
     private void handleLoadingComplete() {
@@ -119,7 +138,6 @@ public class MovieListFragment extends Fragment {
     private void showErrorMessage(@NonNull String message) {
         Log.e(TAG, "Error loading movies");
         errorMessageTextView.setText(message);
-        loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
         errorLayout.setVisibility(View.VISIBLE);
     }
@@ -127,7 +145,6 @@ public class MovieListFragment extends Fragment {
     private void showLoading() {
         Log.i(TAG, "Loading movies");
         loadingProgressBar.setVisibility(View.VISIBLE);
-        movieListRecyclerView.setVisibility(View.GONE);
         errorLayout.setVisibility(View.GONE);
     }
 }

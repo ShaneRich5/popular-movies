@@ -39,7 +39,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public MovieAdapter(@NonNull Context context, @NonNull MovieAdapterOnClickHandler clickHandler) {
-        this(context, clickHandler, new ArrayList<Movie>());
+        this(context, clickHandler, new ArrayList<>());
     }
 
     public void setMovies(@NonNull List<Movie> newMovieList) {
@@ -51,6 +51,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void addMovies(@NonNull List<Movie> movies) {
         this.movies.addAll(movies);
         notifyDataSetChanged();
+    }
+
+    public void clearMovies() {
+        final int size = this.movies.size();
+        if (size <= 0) return;
+        this.movies.clear();
+        notifyItemRangeRemoved(0, size);
     }
 
     @Override

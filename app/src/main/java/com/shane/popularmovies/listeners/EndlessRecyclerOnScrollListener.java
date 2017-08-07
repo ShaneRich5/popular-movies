@@ -2,6 +2,7 @@ package com.shane.popularmovies.listeners;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 /**
  * Created by Shane on 8/5/2017.
@@ -46,6 +47,22 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
 
             loading = true;
         }
+
+        Log.i(TAG, "" + currentPage);
+    }
+
+    public void setCurrentPage(int page) {
+        this.currentPage = page;
+    }
+
+    public void reset() {
+        previousTotal = 0;
+        loading = true;
+        visibleThreshold = 1;
+        firstVisibleItem = 0;
+        visibleItemCount = 0;
+        totalItemCount = 0;
+        currentPage = 1;
     }
 
     public abstract void onLoadMore(int currentPage);
