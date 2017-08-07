@@ -16,6 +16,11 @@ import com.shane.popularmovies.R;
 import com.shane.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -53,7 +58,8 @@ public class MovieFragment extends Fragment {
     }
 
     public void setMovie(@NonNull Movie movie) {
-        toolbar.setTitle(movie.getTitle());
+        String friendlyDate = formatDate(movie.getTitle());
+        toolbar.setTitle(friendlyDate);
         synopsisTextView.setText(movie.getSynopsis());
         ratingsTextView.setText(String.valueOf(movie.getRatings()));
         releaseDateTextView.setText(movie.getReleaseDate());
@@ -61,5 +67,17 @@ public class MovieFragment extends Fragment {
         Picasso.with(getContext())
                 .load("http://image.tmdb.org/t/p/w342/" + movie.getPosterPath())
                 .into(posterImageView);
+    }
+
+    public String formatDate(@NonNull String rawDate) {
+        try {
+            final SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
+            final SimpleDateFormat targetFormat = new SimpleDateFormat("M dd, yyyy", Locale.US);
+            final Date date = originalFormat.parse(rawDate);
+            return targetFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return rawDate;
+        }
     }
 }
