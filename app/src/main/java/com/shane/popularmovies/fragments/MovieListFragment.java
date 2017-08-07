@@ -80,7 +80,7 @@ public class MovieListFragment extends Fragment {
         scrollListener = new EndlessRecyclerOnScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
-                loadMovies(currentPage);
+                fetchMovies(currentPage);
             }
         };
 
@@ -89,7 +89,7 @@ public class MovieListFragment extends Fragment {
     }
 
     private void loadMoviesOnFirstPage() {
-        loadMovies(1);
+        fetchMovies(1);
     }
 
     public void sortOrderChanged(@NonNull String newSortOrder) {
@@ -100,20 +100,20 @@ public class MovieListFragment extends Fragment {
         loadMoviesOnFirstPage();
     }
 
-    private void loadMovies(int page) {
-        Observable<List<Movie>> observable;
-
-        if (sortOrder.equals(POPULAR_SORT_ORDER)) {
-            observable = movieRepository.fetchPopularMovies(page);
-        } else {
-            observable = movieRepository.fetchTopRatedMovies(page);
-        }
-
-        observable.doOnSubscribe(disposable -> showLoading())
+    private void fetchMovies(int page) {
+        fetchMoviesBySortOrder(page)
+                .doOnSubscribe(disposable -> showLoading())
                 .subscribe(
                         movies -> this.handleMoviesLoaded(movies, page),
                         this::handlerLoadingError,
                         this::handleLoadingComplete);
+    }
+
+    private Observable<List<Movie>> fetchMoviesBySortOrder(int page) {
+        if (sortOrder.equals(POPULAR_SORT_ORDER)) {
+            return movieRepository.fetchPopularMovies(page);
+        }
+        return movieRepository.fetchTopRatedMovies(page);
     }
 
     private void handleLoadingComplete() {
@@ -138,6 +138,7 @@ public class MovieListFragment extends Fragment {
     private void showErrorMessage(@NonNull String message) {
         Log.e(TAG, "Error loading movies");
         errorMessageTextView.setText(message);
+        loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
         errorLayout.setVisibility(View.VISIBLE);
     }
