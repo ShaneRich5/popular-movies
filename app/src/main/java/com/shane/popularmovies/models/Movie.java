@@ -5,13 +5,12 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import static android.R.attr.rating;
-
 /**
  * Created by Shane on 8/1/2017.
  */
 
 public class Movie implements Parcelable {
+
     @SerializedName("id") private int id;
     @SerializedName("title") private String title;
     @SerializedName("poster_path") private String posterPath;

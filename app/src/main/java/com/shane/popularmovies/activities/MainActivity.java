@@ -48,8 +48,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
         MenuItem item = menu.findItem(R.id.action_sort);
+        setupSortSpinnerMenuItem(item);
+        return true;
+    }
+
+    private void setupSortSpinnerMenuItem(@NonNull MenuItem item) {
         Spinner sortOptionsSpinner = (Spinner) MenuItemCompat.getActionView(item);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter
@@ -72,7 +76,5 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         });
 
         sortOptionsSpinner.setAdapter(adapter);
-
-        return true;
     }
 }

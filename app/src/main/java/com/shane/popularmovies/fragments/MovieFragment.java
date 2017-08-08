@@ -25,7 +25,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MovieFragment extends Fragment {
-    public static final String TAG = MovieFragment.class.getSimpleName();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.poster_image_view) ImageView posterImageView;

@@ -3,11 +3,9 @@ package com.shane.popularmovies.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +30,6 @@ import io.reactivex.annotations.NonNull;
 
 
 public class MovieListFragment extends Fragment {
-    public static String TAG = MovieListFragment.class.getSimpleName();
 
     public static final String POPULAR_SORT_ORDER = "popular";
     public static final String TOP_RATED_SORT_ORDER = "top_rated";
@@ -46,7 +43,6 @@ public class MovieListFragment extends Fragment {
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
-    @BindView(R.id.error_layout) ConstraintLayout errorLayout;
 
     public MovieListFragment() {}
 
@@ -135,16 +131,14 @@ public class MovieListFragment extends Fragment {
     }
 
     private void showErrorMessage(@NonNull String message) {
-        Log.e(TAG, "Error loading movies");
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
-        errorLayout.setVisibility(View.VISIBLE);
+        errorMessageTextView.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {
-        Log.i(TAG, "Loading movies");
         loadingProgressBar.setVisibility(View.VISIBLE);
-        errorLayout.setVisibility(View.GONE);
+        errorMessageTextView.setVisibility(View.GONE);
     }
 }

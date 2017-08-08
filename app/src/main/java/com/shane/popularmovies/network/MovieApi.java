@@ -1,7 +1,6 @@
 package com.shane.popularmovies.network;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.shane.popularmovies.models.MovieResponse;
@@ -66,8 +65,6 @@ public interface MovieApi {
 
             final Request tokenRequest = originalRequest.newBuilder()
                     .url(urlWithToken).build();
-
-            Log.i("TokenInterceptor", tokenRequest.url().toString());
 
             return chain.proceed(tokenRequest);
         }

@@ -5,6 +5,7 @@ package com.shane.popularmovies.utils;
  */
 
 public class Constants {
+
     private Constants() {
         throw new AssertionError("Cannon instantiate class");
     }
