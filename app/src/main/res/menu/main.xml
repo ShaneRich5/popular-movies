@@ -4,9 +4,15 @@
 
     <item
         android:id="@+id/action_sort"
-        android:title="@string/menu_sort_order"
+        android:title="@string/action_sort_by"
         android:icon="@drawable/ic_sort_white_24dp"
         app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never"
+        android:orderInCategory="100"/>
 
 </menu>

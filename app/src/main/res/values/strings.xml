@@ -9,11 +9,19 @@
     <string name="release_date_icon">Release date icon</string>
     <string name="dummy_content_long_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam elementum ullamcorper sapien, in vestibulum magna aliquet tristique. Mauris commodo vestibulum purus, in dapibus eros cursus quis. In ultricies, lacus in bibendum scelerisque, metus lorem facilisis sapien, vitae imperdiet sem sapien vel metus. Fusce erat elit, ultrices nec ultricies vel, aliquam eget dolor. Nam risus est, fringilla nec finibus eget, tristique ac sapien. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Quisque urna justo, efficitur id nulla at, interdum laoreet massa. Vivamus vitae nisi faucibus, euismod felis et, ultrices elit. Donec volutpat feugiat orci eu malesuada. Ut ornare ligula at lectus maximus, vitae hendrerit ex pretium. Suspendisse convallis eu enim eget imperdiet.</string>
     <string name="dummy_content_short_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
-    <string name="menu_sort_order">Sort By</string>
 
-    <string-array name="sort_order_array">
-        <item>Popular</item>
-        <item>Top Rated</item>
-    </string-array>
+    <string name="action_sort_by">Sort By</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="pref_sort_by_title">Sort by</string>
+
+    <string name="pref_popular_label">popular</string>
+    <string name="pref_top_rated_label">top_rated</string>
+
+    <string name="pref_popular_value">popular</string>
+    <string name="pref_top_rated_value">top_rated</string>
+
 
 </resources>

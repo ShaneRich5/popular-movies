@@ -34,15 +34,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
         movieListFragment = (MovieListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_movie_list);
     }
 
     @Override
-    public void onClick(@NonNull Movie movie) {
-        final Intent intent = new Intent(MainActivity.this, MovieDetailActivity.class);
-        intent.putExtra(Constants.EXTRA_MOVIE, movie);
-        startActivity(intent);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                final Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -53,11 +59,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return true;
     }
 
+    @Override
+    public void onClick(@NonNull Movie movie) {
+        final Intent intent = new Intent(MainActivity.this, MovieDetailActivity.class);
+        intent.putExtra(Constants.EXTRA_MOVIE, movie);
+        startActivity(intent);
+    }
+
     private void setupSortSpinnerMenuItem(@NonNull MenuItem item) {
         Spinner sortOptionsSpinner = (Spinner) MenuItemCompat.getActionView(item);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter
-                .createFromResource(this, R.array.sort_order_array, R.layout.item_sort_option);
+                .createFromResource(this, R.array.pref_sort_by_values, R.layout.item_sort_option);
 
         adapter.setDropDownViewResource(R.layout.item_sort_by_dropdown);
         sortOptionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
