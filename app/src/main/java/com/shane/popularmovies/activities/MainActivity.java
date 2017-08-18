@@ -1,17 +1,16 @@
 package com.shane.popularmovies.activities;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
@@ -21,9 +20,9 @@ import com.shane.popularmovies.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
-    private static String TAG = MainActivity.class.getSimpleName();
 
     private MovieListFragment movieListFragment;
 
@@ -42,6 +41,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_sort:
+                SortOrderFragment sortOrderFragment = new SortOrderFragment();
+                sortOrderFragment.show(getSupportFragmentManager(), "SortOrderFragment");
+                return true;
             case R.id.action_settings:
                 final Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(settingsIntent);
@@ -53,9 +56,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        MenuItem item = menu.findItem(R.id.action_sort);
-        setupSortSpinnerMenuItem(item);
+        getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
 
@@ -66,28 +67,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         startActivity(intent);
     }
 
-    private void setupSortSpinnerMenuItem(@NonNull MenuItem item) {
-        Spinner sortOptionsSpinner = (Spinner) MenuItemCompat.getActionView(item);
+     public static class SortOrderFragment extends DialogFragment {
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter
-                .createFromResource(this, R.array.pref_sort_by_values, R.layout.item_sort_option);
+         @NonNull
+         @Override
+         public Dialog onCreateDialog(Bundle savedInstanceState) {
+             final Context context = getActivity();
+             final String title = getString(R.string.pref_sort_by_title);
+//             final getResources().getStringArray(R.array.pref_sort_by_labels);
 
-        adapter.setDropDownViewResource(R.layout.item_sort_by_dropdown);
-        sortOptionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                final String[] sortBy = {
-                        MovieListFragment.POPULAR_SORT_ORDER,
-                        MovieListFragment.TOP_RATED_SORT_ORDER
-                };
-
-                movieListFragment.sortOrderChanged(sortBy[i]);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
-
-        sortOptionsSpinner.setAdapter(adapter);
-    }
+             AlertDialog.Builder builder = new AlertDialog.Builder(context);
+             builder.setTitle(title)
+                     .setItems(R.array.pref_sort_by_labels, (dialogInterface, index) -> {
+                         Timber.i("Selected" + index);
+                     });
+             return builder.create();
+         }
+     }
 }

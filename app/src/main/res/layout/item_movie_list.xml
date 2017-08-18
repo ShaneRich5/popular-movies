@@ -12,8 +12,6 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/movie_poster_description"
-        android:transitionName="poster"
-        tools:targetApi="lollipop" />
+        android:contentDescription="@string/movie_poster_description" />
 
 </LinearLayout>

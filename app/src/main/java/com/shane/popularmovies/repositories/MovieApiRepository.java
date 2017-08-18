@@ -1,5 +1,9 @@
 package com.shane.popularmovies.repositories;
 
+import com.shane.popularmovies.models.Review;
+import com.shane.popularmovies.models.ReviewResponse;
+import com.shane.popularmovies.models.Trailer;
+import com.shane.popularmovies.models.TrailerResponse;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.models.MovieResponse;
@@ -24,7 +28,7 @@ public class MovieApiRepository implements MovieRepository {
 
     @Override
     public Observable<List<Movie>> fetchTopRatedMovies(int page) {
-        return movieApi.listTopRatedMovies(page)
+        return movieApi.getTopRatedMovies(page)
                 .map(MovieResponse::getMovies)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -32,8 +36,24 @@ public class MovieApiRepository implements MovieRepository {
 
     @Override
     public Observable<List<Movie>> fetchPopularMovies(int page) {
-        return movieApi.listPopularMovies(page)
+        return movieApi.getPopularMovies(page)
                 .map(MovieResponse::getMovies)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    @Override
+    public Observable<List<Review>> fetchMovieReviews(int movieId) {
+        return movieApi.getReviews(movieId)
+                .map(ReviewResponse::getReviews)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    @Override
+    public Observable<List<Trailer>> fetchMovieTrailers(int movieId) {
+        return movieApi.getTrailers(movieId)
+                .map(TrailerResponse::getTrailers)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

@@ -27,6 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
+import timber.log.Timber;
 
 
 public class MovieListFragment extends Fragment {
@@ -127,7 +128,7 @@ public class MovieListFragment extends Fragment {
         } else {
             showErrorMessage(error.getMessage());
         }
-        error.printStackTrace();
+        Timber.e(error);
     }
 
     private void showErrorMessage(@NonNull String message) {

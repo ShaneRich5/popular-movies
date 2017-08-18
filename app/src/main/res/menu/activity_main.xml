@@ -6,7 +6,6 @@
         android:id="@+id/action_sort"
         android:title="@string/action_sort_by"
         android:icon="@drawable/ic_sort_white_24dp"
-        app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom" />
 
     <item

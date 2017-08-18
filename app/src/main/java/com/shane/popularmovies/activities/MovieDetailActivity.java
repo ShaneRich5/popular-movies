@@ -14,6 +14,7 @@ import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.utils.Constants;
 
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -32,11 +33,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         final Intent receivedIntent = getIntent();
         if (receivedIntent.hasExtra(Constants.EXTRA_MOVIE)) {
             final Movie movie = receivedIntent.getParcelableExtra(Constants.EXTRA_MOVIE);
-
             passMovieToFragment(movie);
         } else {
             final String errorMessage = "Error loading movie";
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+            Timber.d("Movie not retrieved from intent");
             finish();
         }
     }

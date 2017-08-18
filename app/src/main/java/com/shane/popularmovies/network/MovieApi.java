@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.shane.popularmovies.models.MovieResponse;
+import com.shane.popularmovies.models.ReviewResponse;
+import com.shane.popularmovies.models.TrailerResponse;
 
 import java.io.IOException;
 
@@ -16,7 +18,9 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
+import timber.log.Timber;
 
 /**
  * Created by Shane on 8/5/2017.
@@ -25,10 +29,16 @@ import retrofit2.http.Query;
 public interface MovieApi {
 
     @GET("movie/popular")
-    Observable<MovieResponse> listPopularMovies(@Query("page") Integer page);
+    Observable<MovieResponse> getPopularMovies(@Query("page") Integer page);
 
     @GET("movie/top_rated")
-    Observable<MovieResponse> listTopRatedMovies(@Query("page") Integer page);
+    Observable<MovieResponse> getTopRatedMovies(@Query("page") Integer page);
+
+    @GET("movie/{movie}/reviews")
+    Observable<ReviewResponse> getReviews(@Path("movie") Integer id);
+
+    @GET("movie/{movie}/videos")
+    Observable<TrailerResponse> getTrailers(@Path("movie") Integer id);
 
     class Factory {
         public static MovieApi create(@NonNull String apiKey) {
@@ -62,6 +72,8 @@ public interface MovieApi {
             final HttpUrl urlWithToken = originalUrl.newBuilder()
                     .addQueryParameter("api_key", token)
                     .build();
+
+            Timber.i(urlWithToken.toString());
 
             final Request tokenRequest = originalRequest.newBuilder()
                     .url(urlWithToken).build();
