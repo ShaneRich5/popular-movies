@@ -23,7 +23,8 @@
 
     <string name="pref_popular_value">popular</string>
     <string name="pref_top_rated_value">top_rated</string>
-    <string name="trailer_thumbnail">Trailer thumbnail</string>
+    <string name="description_trailer_thumbnail">Trailer thumbnail</string>
+    <string name="description_play_button">Play button</string>
 
 
 </resources>
