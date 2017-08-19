@@ -1,5 +1,7 @@
 package com.shane.popularmovies.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -67,11 +69,16 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         reviewAdapter = new ReviewAdapter(getContext());
         trailerAdapter = new TrailerAdapter(getContext(), this);
 
-
         LinearLayoutManager horizontalLayoutManager =
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         LinearLayoutManager verticalLayoutManager =
-                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false) {
+                    @Override
+                    public boolean canScrollVertically() {
+                        return false;
+                    }
+                };
+
 
         trailerRecyclerView.setLayoutManager(horizontalLayoutManager);
         reviewRecyclerView.setLayoutManager(verticalLayoutManager);
@@ -146,6 +153,11 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
 
     @Override
     public void onClick(@NonNull Trailer trailer) {
+        final String key = trailer.getKey();
 
+        String url = "https://www.youtube.com/watch?v=" + key;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        startActivity(intent);
     }
 }

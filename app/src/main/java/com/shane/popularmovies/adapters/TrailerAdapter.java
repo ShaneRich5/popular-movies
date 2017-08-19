@@ -79,8 +79,11 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
         public void bind(@NonNull Trailer trailer) {
             nameTextView.setText(trailer.getName());
+
+            final String key = trailer.getKey();
+
             Picasso.with(context)
-                    .load("http://img.youtube.com/vi/" + trailer.getKey() + "/mqdefault.jpg")
+                    .load("http://img.youtube.com/vi/" + key + "/hqdefault.jpg")
                     .into(thumbnailImageView);
         }
 
