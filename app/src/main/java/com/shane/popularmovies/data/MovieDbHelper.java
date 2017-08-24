@@ -19,7 +19,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
             MovieEntry._ID + " INTEGER PRIMARY KEY," +
             MovieEntry.COLUMN_TITLE + " TEXT NOT NULL," +
             MovieEntry.COLUMN_SYNOPSIS + " TEXT NOT NULL," +
-            MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL," +
+            MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL UNIQUE," +
             MovieEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL," +
             MovieEntry.COLUMN_RATINGS + " REAL NOT NULL," +
             MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL)";

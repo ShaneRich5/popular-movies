@@ -29,8 +29,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     private final Context context;
     private List<Trailer> trailers;
 
-    public interface TrailerAdapterOnClickHandler{
-        void onClick(@NonNull Trailer trailer);
+    public interface TrailerAdapterOnClickHandler {
+        void onTrailerClick(@NonNull Trailer trailer);
     }
 
     public TrailerAdapter(@NonNull Context context, @NonNull TrailerAdapterOnClickHandler clickHandler, @NonNull List<Trailer> trailers) {
@@ -91,7 +91,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         public void onClick(View view) {
             final int index = getAdapterPosition();
             final Trailer trailer = trailers.get(index);
-            clickHandler.onClick(trailer);
+            clickHandler.onTrailerClick(trailer);
         }
     }
 }

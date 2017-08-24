@@ -30,7 +30,11 @@
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings"/>
+        <provider
+            android:authorities="com.shane.popularmovies"
+            android:name="com.shane.popularmovies.data.MovieProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

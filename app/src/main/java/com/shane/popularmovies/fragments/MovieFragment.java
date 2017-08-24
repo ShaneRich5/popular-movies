@@ -1,9 +1,11 @@
 package com.shane.popularmovies.fragments;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +21,17 @@ import android.widget.TextView;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.ReviewAdapter;
 import com.shane.popularmovies.adapters.TrailerAdapter;
+import com.shane.popularmovies.data.MovieContract.MovieEntry;
+import com.shane.popularmovies.data.MovieDbHelper;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.models.Trailer;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
 import com.squareup.picasso.Picasso;
+import com.squareup.sqlbrite2.BriteDatabase;
+import com.squareup.sqlbrite2.SqlBrite;
+import com.squareup.sqlbrite2.SqlBrite.Query;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,22 +40,27 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
-
-    private MovieRepository movieRepository;
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.poster_image_view) ImageView posterImageView;
     @BindView(R.id.ratings_text_view) TextView ratingsTextView;
     @BindView(R.id.synopsis_text_view) TextView synopsisTextView;
+    @BindView(R.id.favourite_fab) FloatingActionButton favouriteFab;
     @BindView(R.id.release_data_text_view) TextView releaseDateTextView;
     @BindView(R.id.trailer_recycler_view) RecyclerView trailerRecyclerView;
     @BindView(R.id.review_recycler_view) RecyclerView reviewRecyclerView;
 
     private ReviewAdapter reviewAdapter;
     private TrailerAdapter trailerAdapter;
+
+    private MovieRepository movieRepository;
+    private Movie movie;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,11 +69,12 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         ButterKnife.bind(this, view);
 
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
-        movieRepository = new MovieApiRepository(api);
+        movieRepository = new MovieApiRepository(api, getContext());
 
         setupLayout();
         return view;
     }
+
 
     private void setupLayout() {
         setupToolbar();
@@ -78,7 +91,6 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
                         return false;
                     }
                 };
-
 
         trailerRecyclerView.setLayoutManager(horizontalLayoutManager);
         reviewRecyclerView.setLayoutManager(verticalLayoutManager);
@@ -103,11 +115,12 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
     }
 
     public void setMovie(@NonNull Movie movie) {
-        String friendlyDate = formatDate(movie.getTitle());
-        toolbar.setTitle(friendlyDate);
+        this.movie = movie;
+        String friendlyDate = formatDate(movie.getReleaseDate());
+        toolbar.setTitle(movie.getTitle());
         synopsisTextView.setText(movie.getSynopsis());
         ratingsTextView.setText(String.valueOf(movie.getRatings()));
-        releaseDateTextView.setText(movie.getReleaseDate());
+        releaseDateTextView.setText(friendlyDate);
 
         Picasso.with(getContext())
                 .load("http://image.tmdb.org/t/p/w342/" + movie.getPosterPath())
@@ -117,6 +130,22 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
 
         fetchReviews(id);
         fetchTrailers(id);
+
+        final String tableName = MovieEntry.TABLE_NAME;
+        final String selectQuery = String.format(Locale.getDefault(),
+                "SELECT * FROM %s WHERE %s LIKE '%d'",
+                tableName, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+
+        MovieDbHelper movieDbHelper = new MovieDbHelper(getContext());
+        SqlBrite sqlBrite = new SqlBrite.Builder().build();
+        BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
+        Observable<Query> favouriteCheck = database.createQuery(tableName, selectQuery);
+        favouriteCheck.subscribe(query -> {
+            final Cursor cursor = query.run();
+            Timber.i("favourite count: " + cursor.getCount());
+            final boolean isFavourite = cursor.getCount() > 0;
+            setIsFavouriteView(isFavourite);
+        });
     }
 
     private void fetchReviews(@NonNull int id) {
@@ -139,6 +168,7 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         Timber.e(error);
     }
 
+
     public String formatDate(@NonNull String rawDate) {
         try {
             final SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
@@ -152,12 +182,30 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
     }
 
     @Override
-    public void onClick(@NonNull Trailer trailer) {
+    public void onTrailerClick(@NonNull Trailer trailer) {
         final String key = trailer.getKey();
 
         String url = "https://www.youtube.com/watch?v=" + key;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         startActivity(intent);
+    }
+
+    private void setIsFavouriteView(boolean isFavourite) {
+        int drawableId = (isFavourite)
+                ? R.drawable.ic_favorite_blue_900_24dp
+                :R.drawable.ic_favorite_white_24dp;
+
+        favouriteFab.setImageResource(drawableId);
+        movie.setFavourite(isFavourite);
+    }
+
+    @OnClick(R.id.favourite_fab)
+    public void onFavouriteClick(FloatingActionButton button) {
+        if (movie == null) return;
+        Timber.i("Movie: " + movie);
+
+        if (movie.isFavourite()) movieRepository.removeFavourite(movie);
+        else movieRepository.saveFavourite(movie);
     }
 }

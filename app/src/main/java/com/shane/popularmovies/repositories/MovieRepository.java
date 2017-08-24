@@ -1,5 +1,7 @@
 package com.shane.popularmovies.repositories;
 
+import android.support.annotation.NonNull;
+
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.models.Review;
 import com.shane.popularmovies.models.Trailer;
@@ -21,4 +23,8 @@ public interface MovieRepository {
     Observable<List<Review>> fetchMovieReviews(int movieId);
 
     Observable<List<Trailer>> fetchMovieTrailers(int movieId);
+
+    void removeFavourite(@NonNull Movie movie);
+
+    void saveFavourite(@NonNull Movie movie);
 }
