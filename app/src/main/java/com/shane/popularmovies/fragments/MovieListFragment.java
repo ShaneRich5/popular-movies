@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.shane.popularmovies.GridSpaceItemDecoration;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.listeners.EndlessRecyclerOnScrollListener;
@@ -31,6 +32,7 @@ import timber.log.Timber;
 
 
 public class MovieListFragment extends Fragment {
+    private static int NUM_OF_GRID_COLUMNS = 2;
 
     public static final String POPULAR_SORT_ORDER = "popular";
     public static final String TOP_RATED_SORT_ORDER = "top_rated";
@@ -64,6 +66,7 @@ public class MovieListFragment extends Fragment {
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         movieListRecyclerView.setLayoutManager(gridLayoutManager);
+        movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(10));
         movieListRecyclerView.setHasFixedSize(true);
 
         if (!(getActivity() instanceof MovieAdapter.MovieAdapterOnClickHandler)) {

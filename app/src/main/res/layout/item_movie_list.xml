@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="2px">
+    android:padding="2dp"
+    card_view:cardCornerRadius="4dp">
 
     <ImageView
         android:id="@+id/poster_image_view"
@@ -12,6 +14,7 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/movie_poster_description" />
+        android:contentDescription="@string/movie_poster_description"
+        tools:src="@mipmap/ic_launcher"/>
 
-</LinearLayout>
+</android.support.v7.widget.CardView>

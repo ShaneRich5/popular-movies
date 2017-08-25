@@ -1,9 +1,11 @@
 package com.shane.popularmovies.models;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.shane.popularmovies.data.MovieContract.MovieEntry;
 
 import java.util.Locale;
 
@@ -129,5 +131,46 @@ public class Movie implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.getDefault(), "Movie: {%d, %s, %b}", id, title, isFavourite);
+    }
+
+    public static final class Builder implements Buildable {
+        private final ContentValues values = new ContentValues();
+
+        public Builder() {}
+
+        public Builder id(int id) {
+            values.put(MovieEntry.COLUMN_MOVIE_ID, id);
+            return this;
+        }
+
+        public Builder title(String title) {
+            values.put(MovieEntry.COLUMN_TITLE, title);
+            return this;
+        }
+
+        public Builder posterPath(String posterPath) {
+            values.put(MovieEntry.COLUMN_POSTER_PATH, posterPath);
+            return this;
+        }
+
+        public Builder synopsis(String synopsis) {
+            values.put(MovieEntry.COLUMN_SYNOPSIS, synopsis);
+            return this;
+        }
+
+        public Builder ratings(double ratings) {
+            values.put(MovieEntry.COLUMN_RATINGS, ratings);
+            return this;
+        }
+
+        public Builder releaseDate(String releaseDate) {
+            values.put(MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+            return this;
+        }
+
+        @Override
+        public ContentValues build() {
+            return values;
+        }
     }
 }

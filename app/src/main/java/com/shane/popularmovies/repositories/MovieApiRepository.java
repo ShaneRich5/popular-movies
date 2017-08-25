@@ -3,7 +3,6 @@ package com.shane.popularmovies.repositories;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -71,13 +70,11 @@ public class MovieApiRepository implements MovieRepository {
 
     @Override
     public void removeFavourite(@NonNull Movie movie) {
-        Timber.i("removeFavourite called");
         context.getContentResolver().delete(MovieEntry.buildMovieUriWithId(movie.getId()), null, null);
     }
 
     @Override
     public void saveFavourite(@NonNull Movie movie) {
-        Timber.d("saveFavourite called");
         final Uri queryUri = MovieEntry.buildMovieUriWithId(movie.getId());
         final Cursor cursor = context.getContentResolver().query(queryUri, null, null, null, null);
 
@@ -86,19 +83,19 @@ public class MovieApiRepository implements MovieRepository {
             return;
         }
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MovieEntry.COLUMN_MOVIE_ID, movie.getId());
-        contentValues.put(MovieEntry.COLUMN_TITLE, movie.getTitle());
-        contentValues.put(MovieEntry.COLUMN_RATINGS, movie.getRatings());
-        contentValues.put(MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-        contentValues.put(MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
-        contentValues.put(MovieEntry.COLUMN_SYNOPSIS, movie.getSynopsis());
-
-        Timber.d("All Cursor: %s", DatabaseUtils.dumpCursorToString(cursor));
+        final ContentValues values = new Movie.Builder()
+                .id(movie.getId())
+                .title(movie.getTitle())
+                .ratings(movie.getRatings())
+                .synopsis(movie.getSynopsis())
+                .posterPath(movie.getPosterPath())
+                .releaseDate(movie.getReleaseDate())
+                .build();
 
         if (cursor.getCount() == 0) {
-            context.getContentResolver().insert(MovieEntry.CONTENT_URI, contentValues);
+            context.getContentResolver().insert(MovieEntry.CONTENT_URI, values);
         }
+
         cursor.close();
     }
 }
