@@ -8,6 +8,7 @@ import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
+import android.support.v7.preference.SwitchPreferenceCompat;
 
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.utils.PreferenceUtils;
@@ -37,7 +38,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         for (int i = 0; i < count; i++) {
             Preference preference = preferenceScreen.getPreference(i);
 
-            if ( ! (preference instanceof CheckBoxPreference)) {
+            if ( ! (preference instanceof CheckBoxPreference
+                    || preference instanceof SwitchPreferenceCompat)) {
                 final String value = sharedPreferences.getString(preference.getKey(), EMPTY_STRING);
                 setPreferenceSummary(preference, value);
             }

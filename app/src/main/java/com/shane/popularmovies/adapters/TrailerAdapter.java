@@ -66,6 +66,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         notifyDataSetChanged();
     }
 
+    public List<Trailer> getTrailers() {
+        return new ArrayList<>(trailers);
+    }
+
     class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.thumbnail_image_view) ImageView thumbnailImageView;
@@ -80,10 +84,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         public void bind(@NonNull Trailer trailer) {
             nameTextView.setText(trailer.getName());
 
-            final String key = trailer.getKey();
+            final String thumbnailUrl = trailer.buildThumbnailUrl();
 
             Picasso.with(context)
-                    .load("http://img.youtube.com/vi/" + key + "/hqdefault.jpg")
+                    .load(thumbnailUrl)
                     .into(thumbnailImageView);
         }
 

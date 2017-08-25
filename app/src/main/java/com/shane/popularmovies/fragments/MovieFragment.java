@@ -5,14 +5,19 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -28,13 +33,12 @@ import com.shane.popularmovies.models.Trailer;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
+import com.shane.popularmovies.utils.DateUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.sqlbrite2.BriteDatabase;
 import com.squareup.sqlbrite2.SqlBrite;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -64,6 +68,12 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
     private Movie movie;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_movie, container, false);
@@ -75,6 +85,36 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
 
         setupLayout();
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_movie_detail, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_share) {
+            shareFirstTrailer();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void shareFirstTrailer() {
+        List<Trailer> trailers = trailerAdapter.getTrailers();
+        if (trailers.size() == 0) return;
+        final Trailer trailer = trailers.get(0);
+
+        final Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
+                .setType("text/plain")
+                .setText(trailer.buildVideoUrl())
+                .setSubject(trailer.getName())
+                .setChooserTitle("Share trailer")
+                .getIntent();
+
+        startActivity(shareIntent);
     }
 
     private void setupLayout() {
@@ -117,7 +157,7 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
 
     public void setMovie(@NonNull Movie movie) {
         this.movie = movie;
-        String friendlyDate = formatDate(movie.getReleaseDate());
+        String friendlyDate = DateUtils.formatDate(movie.getReleaseDate());
         toolbar.setTitle(movie.getTitle());
         synopsisTextView.setText(movie.getSynopsis());
         ratingsTextView.setText(String.valueOf(movie.getRatings()));
@@ -156,14 +196,14 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         return ! (cursor == null || cursor.getCount() <= 0);
     };
 
-    private void fetchReviews(@NonNull int id) {
+    private void fetchReviews(int id) {
         movieRepository.fetchMovieReviews(id)
             .subscribe(
                     reviews -> reviewAdapter.setReviews(reviews),
                     this::handleReviewLoadingError);
     }
 
-    private void fetchTrailers(@NonNull int id) {
+    private void fetchTrailers(int id) {
         movieRepository.fetchMovieTrailers(id)
             .subscribe(
                     trailers -> trailerAdapter.setTrailers(trailers),
@@ -175,24 +215,12 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         Timber.e(error);
     }
 
-    public String formatDate(@NonNull String rawDate) {
-        try {
-            final SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
-            final SimpleDateFormat targetFormat = new SimpleDateFormat("M dd, yyyy", Locale.US);
-            final Date date = originalFormat.parse(rawDate);
-            return targetFormat.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return rawDate;
-        }
-    }
+
 
     @Override
     public void onTrailerClick(@NonNull Trailer trailer) {
-        final String key = trailer.getKey();
-
-        String url = "https://www.youtube.com/watch?v=" + key;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+        final String url = trailer.buildVideoUrl();
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         startActivity(intent);
     }

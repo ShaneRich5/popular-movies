@@ -43,4 +43,12 @@ public class Trailer {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String buildVideoUrl() {
+        return "https://www.youtube.com/watch?v=" + key;
+    }
+
+    public String buildThumbnailUrl() {
+        return "http://img.youtube.com/vi/" + key + "/hqdefault.jpg";
+    }
 }

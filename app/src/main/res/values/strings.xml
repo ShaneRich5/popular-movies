@@ -23,9 +23,17 @@
 
     <string name="pref_popular_value">popular</string>
     <string name="pref_top_rated_value">top_rated</string>
+
+    <string name="pref_favourite_key">favourite</string>
+    <string name="pref_favourite_title">Show Favourites</string>
+
+    <string name="pref_favourite_off_summary">All Movies Shown</string>
+    <string name="pref_favourite_on_summary">Only Favourites Shown</string>
+
     <string name="description_trailer_thumbnail">Trailer thumbnail</string>
     <string name="description_play_button">Play button</string>
 
     <string name="content_authority">com.shane.popularmovies</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="action_share">Share</string>
 </resources>

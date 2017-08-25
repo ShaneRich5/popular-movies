@@ -11,7 +11,7 @@ import com.shane.popularmovies.R;
  * Created by Shane on 8/25/2017.
  */
 
-public class PreferenceUtils {
+public final class PreferenceUtils {
 
     public static String getSortOrder(@NonNull Context context) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
