@@ -141,7 +141,6 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
         database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
                 .map(IS_FAVOURITE_MAPPER)
-//                .mapToOneOrDefault(IS_FAVOURITE_MAPPER, Boolean.FALSE)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(isFavourite -> {
                     Timber.d("(is favourite) movie: %b", isFavourite);
@@ -150,23 +149,12 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
                     Timber.d("(database) %s", movie.toString());
                 }, Timber::e);
 
-//        favouriteCheck.subscribe(query -> {
-//            final Cursor cursor = query.run();
-//            Timber.i("favourite count: " + cursor.getCount());
-//            final boolean isFavourite = cursor.getCount() > 0;
-//            setIsFavouriteView(isFavourite);
-//        });
     }
 
     static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
         final Cursor cursor = query.run();
         return ! (cursor == null || cursor.getCount() <= 0);
     };
-
-//    static Function<Cursor, Boolean> IS_FAVOURITE_MAPPER = cursor -> {
-//        DatabaseUtils.dumpCursor(cursor);
-//        return cursor.getCount() > 0;
-//    };
 
     private void fetchReviews(@NonNull int id) {
         movieRepository.fetchMovieReviews(id)
