@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Locale;
+
 /**
  * Created by Shane on 8/1/2017.
  */
@@ -122,5 +124,10 @@ public class Movie implements Parcelable {
         ratings = in.readDouble();
         releaseDate = in.readString();
         isFavourite = in.readByte() != 0;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "Movie: {%d, %s, %b}", id, title, isFavourite);
     }
 }

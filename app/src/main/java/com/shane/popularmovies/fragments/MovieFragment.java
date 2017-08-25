@@ -31,7 +31,6 @@ import com.shane.popularmovies.repositories.MovieRepository;
 import com.squareup.picasso.Picasso;
 import com.squareup.sqlbrite2.BriteDatabase;
 import com.squareup.sqlbrite2.SqlBrite;
-import com.squareup.sqlbrite2.SqlBrite.Query;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,11 +40,13 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
+    public static final String TAG = MovieFragment.class.getSimpleName();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.poster_image_view) ImageView posterImageView;
@@ -67,6 +68,7 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_movie, container, false);
         ButterKnife.bind(this, view);
+        Timber.tag(TAG);
 
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
@@ -74,7 +76,6 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         setupLayout();
         return view;
     }
-
 
     private void setupLayout() {
         setupToolbar();
@@ -131,22 +132,41 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
         fetchReviews(id);
         fetchTrailers(id);
 
-        final String tableName = MovieEntry.TABLE_NAME;
         final String selectQuery = String.format(Locale.getDefault(),
                 "SELECT * FROM %s WHERE %s LIKE '%d'",
-                tableName, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+                MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
 
         MovieDbHelper movieDbHelper = new MovieDbHelper(getContext());
         SqlBrite sqlBrite = new SqlBrite.Builder().build();
         BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
-        Observable<Query> favouriteCheck = database.createQuery(tableName, selectQuery);
-        favouriteCheck.subscribe(query -> {
-            final Cursor cursor = query.run();
-            Timber.i("favourite count: " + cursor.getCount());
-            final boolean isFavourite = cursor.getCount() > 0;
-            setIsFavouriteView(isFavourite);
-        });
+        database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
+                .map(IS_FAVOURITE_MAPPER)
+//                .mapToOneOrDefault(IS_FAVOURITE_MAPPER, Boolean.FALSE)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isFavourite -> {
+                    Timber.d("(is favourite) movie: %b", isFavourite);
+                    setIsFavouriteView(isFavourite);
+                    favouriteFab.setVisibility(View.VISIBLE);
+                    Timber.d("(database) %s", movie.toString());
+                }, Timber::e);
+
+//        favouriteCheck.subscribe(query -> {
+//            final Cursor cursor = query.run();
+//            Timber.i("favourite count: " + cursor.getCount());
+//            final boolean isFavourite = cursor.getCount() > 0;
+//            setIsFavouriteView(isFavourite);
+//        });
     }
+
+    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
+        final Cursor cursor = query.run();
+        return ! (cursor == null || cursor.getCount() <= 0);
+    };
+
+//    static Function<Cursor, Boolean> IS_FAVOURITE_MAPPER = cursor -> {
+//        DatabaseUtils.dumpCursor(cursor);
+//        return cursor.getCount() > 0;
+//    };
 
     private void fetchReviews(@NonNull int id) {
         movieRepository.fetchMovieReviews(id)
@@ -154,7 +174,6 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
                     reviews -> reviewAdapter.setReviews(reviews),
                     this::handleReviewLoadingError);
     }
-
 
     private void fetchTrailers(@NonNull int id) {
         movieRepository.fetchMovieTrailers(id)
@@ -167,7 +186,6 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
     private void handleReviewLoadingError(@NonNull Throwable error) {
         Timber.e(error);
     }
-
 
     public String formatDate(@NonNull String rawDate) {
         try {
@@ -202,10 +220,11 @@ public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAda
 
     @OnClick(R.id.favourite_fab)
     public void onFavouriteClick(FloatingActionButton button) {
-        if (movie == null) return;
-        Timber.i("Movie: " + movie);
-
         if (movie.isFavourite()) movieRepository.removeFavourite(movie);
         else movieRepository.saveFavourite(movie);
+
+        boolean isFavourite = ! movie.isFavourite();
+        setIsFavouriteView(isFavourite);
+        Timber.d("(fab clicked) %s", movie.toString());
     }
 }

@@ -102,6 +102,7 @@ public class MovieProvider extends ContentProvider {
                     Timber.e(exception);
                     throw exception;
                 }
+                Timber.i("db insert called: %d", id);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -131,10 +132,8 @@ public class MovieProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if (numberOfRowsDeleted != 0) {
-            notifyChange(uri);
-        }
-
+        if (numberOfRowsDeleted != 0) notifyChange(uri);
+        Timber.i("db delete called: %d", numberOfRowsDeleted);
         return numberOfRowsDeleted;
     }
 

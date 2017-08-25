@@ -1,8 +1,10 @@
 package com.shane.popularmovies.repositories;
 
-import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Context;
-import android.os.Build;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
@@ -69,36 +71,34 @@ public class MovieApiRepository implements MovieRepository {
 
     @Override
     public void removeFavourite(@NonNull Movie movie) {
+        Timber.i("removeFavourite called");
         context.getContentResolver().delete(MovieEntry.buildMovieUriWithId(movie.getId()), null, null);
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public void saveFavourite(@NonNull Movie movie) {
-        int deleted = context.getContentResolver().delete(MovieEntry.CONTENT_URI, null, null);
-        Timber.i("Row deleted %d", deleted);
-//        final Uri queryUri = MovieEntry.buildMovieUriWithId(movie.getId());
-//        final Cursor cursor = context.getContentResolver().query(queryUri, null, null, null, null);
-//
-//        if (null == cursor) {
-//            Timber.i("saveFavourte: Empty curser");
-//            return;
-//        }
-//
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(MovieEntry.COLUMN_MOVIE_ID, movie.getId());
-//        contentValues.put(MovieEntry.COLUMN_TITLE, movie.getTitle());
-//        contentValues.put(MovieEntry.COLUMN_RATINGS, movie.getRatings());
-//        contentValues.put(MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-//        contentValues.put(MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
-//        contentValues.put(MovieEntry.COLUMN_SYNOPSIS, movie.getSynopsis());
-//
-//        Timber.i("Cursor count: %d", cursor.getCount());
-//        Timber.d("All Cursor: %s", DatabaseUtils.dumpCursorToString(cursor));
-//
-//        if (cursor.getCount() == 0) {
-//            context.getContentResolver().insert(MovieEntry.CONTENT_URI, contentValues);
-//        }
-//        cursor.close();
+        Timber.d("saveFavourite called");
+        final Uri queryUri = MovieEntry.buildMovieUriWithId(movie.getId());
+        final Cursor cursor = context.getContentResolver().query(queryUri, null, null, null, null);
+
+        if (null == cursor) {
+            Timber.d("saveFavourite: Empty cursor");
+            return;
+        }
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+        contentValues.put(MovieEntry.COLUMN_TITLE, movie.getTitle());
+        contentValues.put(MovieEntry.COLUMN_RATINGS, movie.getRatings());
+        contentValues.put(MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+        contentValues.put(MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
+        contentValues.put(MovieEntry.COLUMN_SYNOPSIS, movie.getSynopsis());
+
+        Timber.d("All Cursor: %s", DatabaseUtils.dumpCursorToString(cursor));
+
+        if (cursor.getCount() == 0) {
+            context.getContentResolver().insert(MovieEntry.CONTENT_URI, contentValues);
+        }
+        cursor.close();
     }
 }

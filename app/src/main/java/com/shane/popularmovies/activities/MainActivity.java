@@ -3,6 +3,8 @@ package com.shane.popularmovies.activities;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -14,6 +16,7 @@ import android.view.MenuItem;
 
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
+import com.shane.popularmovies.data.MovieContract;
 import com.shane.popularmovies.fragments.MovieListFragment;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.utils.Constants;
@@ -33,6 +36,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        final Cursor cursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
+        DatabaseUtils.dumpCursor(cursor);
+        if (cursor != null) cursor.close();
 
         setSupportActionBar(toolbar);
         movieListFragment = (MovieListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_movie_list);
