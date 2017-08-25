@@ -49,8 +49,8 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class MovieFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
-    public static final String TAG = MovieFragment.class.getSimpleName();
+public class MovieDetailFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
+    public static final String TAG = MovieDetailFragment.class.getSimpleName();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.poster_image_view) ImageView posterImageView;

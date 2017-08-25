@@ -10,6 +10,6 @@
         android:id="@+id/fragment_movie"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.shane.popularmovies.fragments.MovieFragment" />
+        android:name="com.shane.popularmovies.fragments.MovieDetailFragment" />
 
 </LinearLayout>

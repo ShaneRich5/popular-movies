@@ -15,6 +15,7 @@ import com.shane.popularmovies.R;
  */
 
 public class SortOrderDialogFragment extends DialogFragment {
+    public static final String TAG = SortOrderDialogFragment.class.getName();
 
     @NonNull
     @Override

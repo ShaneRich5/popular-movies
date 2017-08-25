@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.shane.popularmovies.R;
-import com.shane.popularmovies.fragments.MovieFragment;
+import com.shane.popularmovies.fragments.MovieDetailFragment;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.utils.Constants;
 
@@ -21,7 +21,7 @@ import timber.log.Timber;
 public class MovieDetailActivity extends AppCompatActivity {
 
 
-    private MovieFragment movieFragment;
+    private MovieDetailFragment movieFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void passMovieToFragment(@NonNull Movie movie) {
         final FragmentManager manager = getSupportFragmentManager();
-        movieFragment = (MovieFragment) manager.findFragmentById(R.id.fragment_movie);
+        movieFragment = (MovieDetailFragment) manager.findFragmentById(R.id.fragment_movie);
         movieFragment.setMovie(movie);
 
         final ActionBar actionBar = getSupportActionBar();

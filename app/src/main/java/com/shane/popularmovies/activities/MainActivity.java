@@ -14,6 +14,7 @@ import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.data.MovieContract;
 import com.shane.popularmovies.fragments.MovieListFragment;
+import com.shane.popularmovies.fragments.SortOrderDialogFragment;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.utils.Constants;
 
@@ -43,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_sort:
+                SortOrderDialogFragment sortOrderFragment = new SortOrderDialogFragment();
+                sortOrderFragment.show(getSupportFragmentManager(), SortOrderDialogFragment.TAG);
+                return true;
             case R.id.action_settings:
                 final Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(settingsIntent);
