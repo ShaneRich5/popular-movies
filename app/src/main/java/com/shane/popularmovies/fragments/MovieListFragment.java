@@ -26,6 +26,7 @@ import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
+import com.shane.popularmovies.utils.PreferenceUtils;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -74,7 +75,7 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onResume() {
         super.onResume();
-        readSharedPreferences();
+        sortOrder = PreferenceUtils.getSortOrder(getContext());
     }
 
     @Override
@@ -196,10 +197,9 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.pref_sort_by_key))) {
-            String defaultValue = getString(R.string.pref_popular_value);
-            String value = sharedPreferences.getString(key, defaultValue);
-            if (sortOrder.equals(value)) return;
-            sortOrder = value;
+            final String sortValue = PreferenceUtils.getSortOrder(getContext());
+            if (sortOrder.equals(sortValue)) return;
+            sortOrder = sortValue;
             resetRecyclerView();
         }
     }
@@ -207,15 +207,7 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     private void setupSharedPreferences() {
         PreferenceManager.getDefaultSharedPreferences(getContext())
                 .registerOnSharedPreferenceChangeListener(this);
-        readSharedPreferences();
-    }
-
-    private void readSharedPreferences() {
-        final String key = getString(R.string.pref_sort_by_key);
-        final String defaultValue = getString(R.string.pref_popular_value);
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        sortOrder = sharedPreferences.getString(key, defaultValue);
+        sortOrder = PreferenceUtils.getSortOrder(getContext());
     }
 
     @Override
