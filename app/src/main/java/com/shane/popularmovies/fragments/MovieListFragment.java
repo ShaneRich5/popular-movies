@@ -64,7 +64,7 @@ public class MovieListFragment extends Fragment {
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
         movieListRecyclerView.setLayoutManager(gridLayoutManager);
         movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(10));
         movieListRecyclerView.setHasFixedSize(true);
