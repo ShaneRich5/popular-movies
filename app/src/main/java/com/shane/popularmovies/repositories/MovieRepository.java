@@ -25,4 +25,6 @@ public interface MovieRepository {
     void removeFavourite(@NonNull Movie movie);
 
     void saveFavourite(@NonNull Movie movie);
+
+    Observable<List<Movie>> loadMoviesFromCache();
 }

@@ -8,10 +8,9 @@
 
     <include layout="@layout/partial_toolbar"/>
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_movie_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.shane.popularmovies.fragments.MovieBrowseFragment" />
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

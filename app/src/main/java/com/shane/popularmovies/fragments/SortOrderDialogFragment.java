@@ -1,14 +1,13 @@
 package com.shane.popularmovies.fragments;
 
 import android.app.Dialog;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.preference.PreferenceManager;
 
 import com.shane.popularmovies.R;
+import com.shane.popularmovies.utils.PreferenceUtils;
 
 /**
  * Created by Shane on 8/25/2017.
@@ -29,12 +28,9 @@ public class SortOrderDialogFragment extends DialogFragment {
     }
 
     private void updatePreferences(int index) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = preferences.edit();
-        String key = getString(R.string.pref_sort_by_key);
-        String popular = getString(R.string.pref_popular_value);
-        String topRated = getString(R.string.pref_top_rated_value);
-        editor.putString(key, (index == 0) ? popular : topRated);
-        editor.apply();
+        final String popular = getString(R.string.pref_popular_value);
+        final String topRated = getString(R.string.pref_top_rated_value);
+        final String value = (index == 0) ? popular : topRated;
+        PreferenceUtils.setSortOrder(getContext(), value);
     }
 }

@@ -15,10 +15,12 @@ import com.shane.popularmovies.models.Trailer;
 import com.shane.popularmovies.models.TrailerResponse;
 import com.shane.popularmovies.network.MovieApi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -90,4 +92,36 @@ public class MovieApiRepository implements MovieRepository {
 
         cursor.close();
     }
+
+    @Override
+    public Observable<List<Movie>> loadMoviesFromCache() {
+        return readMoviesFromDatabase()
+                .map(CURSOR_MOVIE_LIST_MAPPER)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Observable<Cursor> readMoviesFromDatabase() {
+        return Observable.create(observer -> {
+            Cursor cursor = context.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
+            observer.onNext(cursor);
+        });
+    }
+
+    private static Function<Cursor, List<Movie>> CURSOR_MOVIE_LIST_MAPPER = cursor -> {
+        List<Movie> movies = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            final int id = cursor.getInt(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_ID));
+            final String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
+            final String posterPath = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH));
+            final String synopsis = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_SYNOPSIS));
+            final double ratings = cursor.getDouble(cursor.getColumnIndex(MovieEntry.COLUMN_RATINGS));
+
+            final String releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+
+            final Movie movie = new Movie(id, title, posterPath, synopsis, ratings, releaseDate);
+            movies.add(movie);
+        }
+        return movies;
+    };
 }
