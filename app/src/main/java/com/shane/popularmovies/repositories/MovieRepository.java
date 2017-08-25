@@ -16,9 +16,7 @@ import io.reactivex.Observable;
 
 public interface MovieRepository {
 
-    Observable<List<Movie>> fetchTopRatedMovies(int page);
-
-    Observable<List<Movie>> fetchPopularMovies(int page);
+    Observable<List<Movie>> fetchMovies(@NonNull String sortOrder, int page);
 
     Observable<List<Review>> fetchMovieReviews(int movieId);
 

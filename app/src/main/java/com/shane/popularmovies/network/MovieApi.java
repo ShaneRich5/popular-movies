@@ -28,11 +28,8 @@ import timber.log.Timber;
 
 public interface MovieApi {
 
-    @GET("movie/popular")
-    Observable<MovieResponse> getPopularMovies(@Query("page") Integer page);
-
-    @GET("movie/top_rated")
-    Observable<MovieResponse> getTopRatedMovies(@Query("page") Integer page);
+    @GET("movie/{sortOrder}")
+    Observable<MovieResponse> getMovies(@Path("sortOrder") String SortOrder, @Query("page") Integer page);
 
     @GET("movie/{movie}/reviews")
     Observable<ReviewResponse> getReviews(@Path("movie") Integer id);

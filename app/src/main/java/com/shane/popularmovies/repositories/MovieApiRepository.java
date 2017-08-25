@@ -37,16 +37,8 @@ public class MovieApiRepository implements MovieRepository {
     }
 
     @Override
-    public Observable<List<Movie>> fetchTopRatedMovies(int page) {
-        return movieApi.getTopRatedMovies(page)
-                .map(MovieResponse::getMovies)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override
-    public Observable<List<Movie>> fetchPopularMovies(int page) {
-        return movieApi.getPopularMovies(page)
+    public Observable<List<Movie>> fetchMovies(@NonNull String sortOrder, int page) {
+        return movieApi.getMovies(sortOrder, page)
                 .map(MovieResponse::getMovies)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

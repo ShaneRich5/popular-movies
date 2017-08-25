@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -46,7 +47,7 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     private MovieRepository movieRepository;
     private EndlessRecyclerOnScrollListener scrollListener;
 
-    private String sortOrder = POPULAR_SORT_ORDER;
+    private String sortOrder;
 
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
@@ -59,6 +60,7 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        setupSharedPreferences();
     }
 
     @Override
@@ -70,14 +72,21 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        readSharedPreferences();
+    }
+
+    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        final int NUM_OF_GRID_COLUMNS = 2;
+        final int PIXEL_GRID_SPACING = 10;
 
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
-        int NUM_OF_GRID_COLUMNS = 2;
-        int PIXEL_GRID_SPACING = 10;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
         movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(PIXEL_GRID_SPACING));
         movieListRecyclerView.setLayoutManager(gridLayoutManager);
@@ -107,12 +116,6 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
         fetchMovies(1);
     }
 
-    public void sortOrderChanged(@NonNull String newSortOrder) {
-        if (sortOrder.equals(newSortOrder)) return;
-        sortOrder = newSortOrder;
-        resetRecyclerView();
-    }
-
     private void resetRecyclerView() {
         movieAdapter.clearMovies();
         scrollListener.reset();
@@ -120,7 +123,7 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     }
 
     private void fetchMovies(int page) {
-        fetchMoviesBySortOrder(page)
+        fetchMoviesBySortOrder(sortOrder, page)
                 .doOnSubscribe(disposable -> showLoading())
                 .subscribe(
                         movies -> this.handleMoviesLoaded(movies, page),
@@ -128,11 +131,8 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
                         this::handleLoadingComplete);
     }
 
-    private Observable<List<Movie>> fetchMoviesBySortOrder(int page) {
-        if (sortOrder.equals(POPULAR_SORT_ORDER)) {
-            return movieRepository.fetchPopularMovies(page);
-        }
-        return movieRepository.fetchTopRatedMovies(page);
+    private Observable<List<Movie>> fetchMoviesBySortOrder(@NonNull String sortOrder, int page) {
+        return movieRepository.fetchMovies(sortOrder, page);
     }
 
     private void handleLoadingComplete() {
@@ -196,7 +196,32 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.pref_sort_by_key))) {
-
+            String defaultValue = getString(R.string.pref_popular_value);
+            String value = sharedPreferences.getString(key, defaultValue);
+            if (sortOrder.equals(value)) return;
+            sortOrder = value;
+            resetRecyclerView();
         }
+    }
+
+    private void setupSharedPreferences() {
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                .registerOnSharedPreferenceChangeListener(this);
+        readSharedPreferences();
+    }
+
+    private void readSharedPreferences() {
+        final String key = getString(R.string.pref_sort_by_key);
+        final String defaultValue = getString(R.string.pref_popular_value);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sortOrder = sharedPreferences.getString(key, defaultValue);
+    }
+
+    @Override
+    public void onDestroy() {
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                .unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
     }
 }
