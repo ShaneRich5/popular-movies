@@ -1,6 +1,7 @@
 package com.shane.popularmovies.fragments;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,9 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -32,7 +36,8 @@ import io.reactivex.annotations.NonNull;
 import timber.log.Timber;
 
 
-public class MovieListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class MovieListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String POPULAR_SORT_ORDER = "popular";
     public static final String TOP_RATED_SORT_ORDER = "top_rated";
@@ -49,6 +54,12 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
 
     public MovieListFragment() {}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -159,5 +170,33 @@ public class MovieListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onRefresh() {
         resetRecyclerView();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_movie_list, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort:
+                SortOrderDialogFragment sortOrderFragment = new SortOrderDialogFragment();
+                sortOrderFragment.show(getActivity().getSupportFragmentManager(), "SortOrderFragment");
+                return true;
+            case R.id.menu_refresh:
+                resetRecyclerView();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getResources().getString(R.string.pref_sort_by_key))) {
+
+        }
     }
 }
