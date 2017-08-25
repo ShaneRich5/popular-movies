@@ -5,10 +5,34 @@
     android:orientation="vertical"
     tools:context="com.shane.popularmovies.fragments.MovieListFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/movie_list_recycler"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+    
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/movie_list_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/error_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/error_message_text_view"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:drawableTop="@drawable/ic_error_outline_grey_700_48dp"
+                tools:mockup="Failed to load movies" />
+        </LinearLayout>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <ProgressBar
         android:id="@+id/load_progress_bar"
@@ -16,20 +40,4 @@
         android:layout_height="40dp"
         android:visibility="gone"/>
 
-    <LinearLayout
-        android:id="@+id/error_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/error_message_text_view"
-            android:layout_width="400dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:drawableTop="@drawable/ic_error_outline_grey_700_48dp"
-            tools:mockup="Failed to load movies" />
-    </LinearLayout>
 </LinearLayout>

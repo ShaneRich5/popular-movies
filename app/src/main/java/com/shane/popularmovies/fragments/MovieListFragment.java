@@ -4,6 +4,7 @@ package com.shane.popularmovies.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,8 +32,7 @@ import io.reactivex.annotations.NonNull;
 import timber.log.Timber;
 
 
-public class MovieListFragment extends Fragment {
-    private static int NUM_OF_GRID_COLUMNS = 2;
+public class MovieListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final String POPULAR_SORT_ORDER = "popular";
     public static final String TOP_RATED_SORT_ORDER = "top_rated";
@@ -46,6 +46,7 @@ public class MovieListFragment extends Fragment {
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
+    @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
 
     public MovieListFragment() {}
 
@@ -64,9 +65,11 @@ public class MovieListFragment extends Fragment {
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
+        int NUM_OF_GRID_COLUMNS = 2;
+        int PIXEL_GRID_SPACING = 10;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
+        movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(PIXEL_GRID_SPACING));
         movieListRecyclerView.setLayoutManager(gridLayoutManager);
-        movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(10));
         movieListRecyclerView.setHasFixedSize(true);
 
         if (!(getActivity() instanceof MovieAdapter.MovieAdapterOnClickHandler)) {
@@ -83,6 +86,8 @@ public class MovieListFragment extends Fragment {
             }
         };
 
+        swipeRefreshLayout.setOnRefreshListener(this);
+
         movieListRecyclerView.addOnScrollListener(scrollListener);
         loadMoviesOnFirstPage();
     }
@@ -94,6 +99,10 @@ public class MovieListFragment extends Fragment {
     public void sortOrderChanged(@NonNull String newSortOrder) {
         if (sortOrder.equals(newSortOrder)) return;
         sortOrder = newSortOrder;
+        resetRecyclerView();
+    }
+
+    private void resetRecyclerView() {
         movieAdapter.clearMovies();
         scrollListener.reset();
         loadMoviesOnFirstPage();
@@ -117,6 +126,7 @@ public class MovieListFragment extends Fragment {
 
     private void handleLoadingComplete() {
         loadingProgressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void handleMoviesLoaded(@NonNull List<Movie> movies, int page) {
@@ -144,5 +154,10 @@ public class MovieListFragment extends Fragment {
     private void showLoading() {
         loadingProgressBar.setVisibility(View.VISIBLE);
         errorMessageTextView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onRefresh() {
+        resetRecyclerView();
     }
 }

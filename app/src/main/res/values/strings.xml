@@ -27,4 +27,5 @@
     <string name="description_play_button">Play button</string>
 
     <string name="content_authority">com.shane.popularmovies</string>
+    <string name="menu_refresh">Refresh</string>
 </resources>
