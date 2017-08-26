@@ -4,7 +4,10 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 /**
- * Created by Shane on 8/5/2017.
+ * Disclaimer: A lot of the code from this class came from stackoverflow and a github wiki tutorial
+ * (linked below) that I came across while researching the problem.
+ *
+ * https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
  */
 
 public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScrollListener {
