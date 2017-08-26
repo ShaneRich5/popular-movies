@@ -1,43 +1,43 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="com.shane.popularmovies.fragments.MovieListFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/movie_list_recycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            tools:visibility="visible"/>
 
-        <LinearLayout
-            android:id="@+id/error_layout"
+        <TextView
+            android:id="@+id/error_message_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:visibility="gone">
+            android:textAlignment="center"
+            android:visibility="visible"
+            android:drawableTop="@drawable/ic_error_outline_grey_700_48dp"
+            android:drawablePadding="13dp"
+            android:textStyle="bold"
+            android:scaleY="1"
+            android:scaleX="1"
+            tools:visibility="visible"
+            tools:text="Failed to load movies" />
 
-            <TextView
-                android:id="@+id/error_message_text_view"
-                android:layout_width="400dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:drawableTop="@drawable/ic_error_outline_grey_700_48dp"
-                tools:mockup="Failed to load movies" />
-        </LinearLayout>
+        <ProgressBar
+            android:id="@+id/load_progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:visibility="gone"/>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>
 
-    <ProgressBar
-        android:id="@+id/load_progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:visibility="gone"/>
 
-</LinearLayout>

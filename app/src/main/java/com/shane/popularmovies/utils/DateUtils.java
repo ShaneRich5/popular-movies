@@ -15,8 +15,8 @@ public final class DateUtils {
 
     public static String formatDate(@NonNull String rawDate) {
         try {
-            final SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
-            final SimpleDateFormat targetFormat = new SimpleDateFormat("M dd, yyyy", Locale.US);
+            final SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-M-dd", Locale.getDefault());
+            final SimpleDateFormat targetFormat = new SimpleDateFormat("M dd, yyyy", Locale.getDefault());
             final Date date = originalFormat.parse(rawDate);
             return targetFormat.format(date);
         } catch (ParseException e) {

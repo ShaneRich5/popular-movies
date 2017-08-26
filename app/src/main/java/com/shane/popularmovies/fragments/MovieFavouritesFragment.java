@@ -9,7 +9,9 @@ import com.shane.popularmovies.models.Movie;
 import java.util.List;
 
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
+
 
 /**
  * Created by Shane on 8/25/2017.
@@ -18,16 +20,16 @@ import timber.log.Timber;
 public class MovieFavouritesFragment extends MovieListFragment {
 
     public static final String TAG = MovieFavouritesFragment.class.getName();
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadMoviesFromCache();
-
     }
 
     private void loadMoviesFromCache() {
-        movieRepository.loadMoviesFromCache()
+        compositeDisposable.add(movieRepository.loadMoviesFromCache()
                 .doOnSubscribe(disposable -> {
                     showLoading();
                     movieAdapter.clearMovies();
@@ -36,17 +38,17 @@ public class MovieFavouritesFragment extends MovieListFragment {
                         this::handleMoviesLoaded,
                         this::handleLoadError,
                         this::handleLoadComplete
-                );
+                ));
     }
 
     private void showLoading() {
-        errorLinearLayout.setVisibility(View.GONE);
-        movieListRecyclerView.setVisibility(View.GONE);
+        errorMessageTextView.setVisibility(View.GONE);
         loadingProgressBar.setVisibility(View.VISIBLE);
     }
 
     private void handleLoadComplete() {
         loadingProgressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void handleLoadError(Throwable error) {
@@ -55,7 +57,10 @@ public class MovieFavouritesFragment extends MovieListFragment {
     }
 
     private void handleMoviesLoaded(@NonNull List<Movie> movies) {
+        loadingProgressBar.setVisibility(View.GONE);
+        errorMessageTextView.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
         movieAdapter.setMovies(movies);
     }
 
@@ -63,11 +68,17 @@ public class MovieFavouritesFragment extends MovieListFragment {
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
-        errorLinearLayout.setVisibility(View.VISIBLE);
+        errorMessageTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onRefresh() {
+        loadMoviesFromCache();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }

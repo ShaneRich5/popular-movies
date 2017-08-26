@@ -23,7 +23,6 @@ import com.shane.popularmovies.fragments.MovieBrowseFragment;
 import com.shane.popularmovies.fragments.MovieFavouritesFragment;
 import com.shane.popularmovies.fragments.SortOrderDialogFragment;
 import com.shane.popularmovies.models.Movie;
-import com.shane.popularmovies.utils.Constants;
 import com.shane.popularmovies.utils.PreferenceUtils;
 
 import butterknife.BindView;
@@ -121,7 +120,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(@NonNull Movie movie) {
         final Intent intent = new Intent(MainActivity.this, MovieDetailActivity.class);
-        intent.putExtra(Constants.EXTRA_MOVIE, movie);
+        intent.putExtra(MovieDetailActivity.EXTRA_MOVIE, movie);
         startActivity(intent);
     }
 

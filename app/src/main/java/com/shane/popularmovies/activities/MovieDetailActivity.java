@@ -3,39 +3,43 @@ package com.shane.popularmovies.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.fragments.MovieDetailFragment;
 import com.shane.popularmovies.models.Movie;
-import com.shane.popularmovies.utils.Constants;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class MovieDetailActivity extends AppCompatActivity {
+    public static final String EXTRA_MOVIE = "EXTRA_MOVIE";
 
-
-    private MovieDetailFragment movieFragment;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.fragment_movie) FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
+        setupToolbar();
+        createFragmentWithMovieFromIntent();
         retrieveMovieFromIntent();
     }
 
-    private void retrieveMovieFromIntent() {
-        final Intent receivedIntent = getIntent();
-        if (receivedIntent.hasExtra(Constants.EXTRA_MOVIE)) {
-            final Movie movie = receivedIntent.getParcelableExtra(Constants.EXTRA_MOVIE);
-            passMovieToFragment(movie);
+    private void createFragmentWithMovieFromIntent() {
+        if (getIntent().hasExtra(MovieDetailActivity.EXTRA_MOVIE)) {
+            final Movie movie = retrieveMovieFromIntent();
+            createMovieFragment(movie);
         } else {
             final String errorMessage = "Error loading movie";
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
@@ -44,16 +48,19 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void passMovieToFragment(@NonNull Movie movie) {
-        final FragmentManager manager = getSupportFragmentManager();
-        movieFragment = (MovieDetailFragment) manager.findFragmentById(R.id.fragment_movie);
-        movieFragment.setMovie(movie);
+    private void createMovieFragment(@NonNull Movie movie) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(frameLayout.getId(), MovieDetailFragment.newInstance(movie), MovieDetailFragment.TAG)
+                .commit();
+    }
 
+    private void setupToolbar() {
         final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
+    }
 
-        if (actionBar != null) {
-            actionBar.setTitle(movie.getTitle());
-        }
+    private Movie retrieveMovieFromIntent() {
+        return getIntent().getParcelableExtra(MovieDetailActivity.EXTRA_MOVIE);
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
 
 /**
@@ -28,6 +29,7 @@ import timber.log.Timber;
 public class MovieBrowseFragment extends MovieListFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener  {
     public static final String TAG = MovieBrowseFragment.class.getName();
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private String sortOrder;
 
@@ -110,12 +112,12 @@ public class MovieBrowseFragment extends MovieListFragment
     }
 
     private void fetchMovies(int page) {
-        fetchMoviesBySortOrder(sortOrder, page)
+        compositeDisposable.add(fetchMoviesBySortOrder(sortOrder, page)
                 .doOnSubscribe(disposable -> showLoading())
                 .subscribe(
                         movies -> this.handleMoviesLoaded(movies, page),
                         this::handlerLoadingError,
-                        this::handleLoadingComplete);
+                        this::handleLoadingComplete));
     }
 
     private void setupSharedPreferences() {
@@ -139,6 +141,7 @@ public class MovieBrowseFragment extends MovieListFragment
 
     private void handleMoviesLoaded(@NonNull List<Movie> movies, int page) {
         movieListRecyclerView.setVisibility(View.VISIBLE);
+        errorMessageTextView.setVisibility(View.GONE);
         if (page == 1) movieAdapter.setMovies(movies);
         else movieAdapter.addMovies(movies);
     }
@@ -152,17 +155,20 @@ public class MovieBrowseFragment extends MovieListFragment
         Timber.e(error);
     }
 
-
-
     private void showErrorMessage(@NonNull String message) {
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
-        movieListRecyclerView.setVisibility(View.GONE);
-        errorLinearLayout.setVisibility(View.VISIBLE);
+        errorMessageTextView.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {
         loadingProgressBar.setVisibility(View.VISIBLE);
         errorMessageTextView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        compositeDisposable.clear();
     }
 }

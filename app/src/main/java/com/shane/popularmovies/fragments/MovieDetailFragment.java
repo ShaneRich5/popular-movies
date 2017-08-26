@@ -13,7 +13,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,8 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.shane.popularmovies.R;
+import com.shane.popularmovies.activities.MovieDetailActivity;
 import com.shane.popularmovies.adapters.ReviewAdapter;
 import com.shane.popularmovies.adapters.TrailerAdapter;
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
@@ -45,14 +46,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MovieDetailFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.poster_image_view) ImageView posterImageView;
     @BindView(R.id.ratings_text_view) TextView ratingsTextView;
     @BindView(R.id.synopsis_text_view) TextView synopsisTextView;
@@ -66,6 +68,14 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
 
     private MovieRepository movieRepository;
     private Movie movie;
+
+    public static MovieDetailFragment newInstance(@NonNull Movie movie) {
+        MovieDetailFragment fragment = new MovieDetailFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(MovieDetailActivity.EXTRA_MOVIE, movie);
+        fragment.setArguments(arguments);
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,6 +93,10 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
+        if (getArguments() != null) {
+            movie = getArguments().getParcelable(MovieDetailActivity.EXTRA_MOVIE);
+            if (movie != null) setMovie(movie);
+        }
         setupLayout();
         return view;
     }
@@ -104,7 +118,10 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
 
     private void shareFirstTrailer() {
         List<Trailer> trailers = trailerAdapter.getTrailers();
-        if (trailers.size() == 0) return;
+        if (trailers.size() == 0) {
+            Toast.makeText(getContext(), "No trailers to share", Toast.LENGTH_SHORT).show();
+            return;
+        }
         final Trailer trailer = trailers.get(0);
 
         final Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
@@ -118,8 +135,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     }
 
     private void setupLayout() {
-        setupToolbar();
-
         reviewAdapter = new ReviewAdapter(getContext());
         trailerAdapter = new TrailerAdapter(getContext(), this);
 
@@ -140,25 +155,16 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         reviewRecyclerView.setAdapter(reviewAdapter);
     }
 
-    private void setupToolbar() {
-        final AppCompatActivity activity = ((AppCompatActivity) getActivity());
-        final ActionBar activityActionBar = activity.getSupportActionBar();
-
-        if (activityActionBar == null) {
-            activity.setSupportActionBar(toolbar);
-
-            final ActionBar fragmentActionBar = activity.getSupportActionBar();
-
-            if (fragmentActionBar != null) {
-                fragmentActionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
-    }
-
-    public void setMovie(@NonNull Movie movie) {
+    private void setMovie(@NonNull Movie movie) {
         this.movie = movie;
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setTitle(movie.getTitle());
+        }
+
         String friendlyDate = DateUtils.formatDate(movie.getReleaseDate());
-        toolbar.setTitle(movie.getTitle());
         synopsisTextView.setText(movie.getSynopsis());
         ratingsTextView.setText(String.valueOf(movie.getRatings()));
         releaseDateTextView.setText(friendlyDate);
@@ -171,7 +177,10 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
 
         fetchReviews(id);
         fetchTrailers(id);
+        checkIfMovieIsFavoured();
+    }
 
+    private void checkIfMovieIsFavoured() {
         final String selectQuery = String.format(Locale.getDefault(),
                 "SELECT * FROM %s WHERE %s LIKE '%d'",
                 MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
@@ -183,12 +192,9 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                 .map(IS_FAVOURITE_MAPPER)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(isFavourite -> {
-                    Timber.d("(is favourite) movie: %b", isFavourite);
                     setIsFavouriteView(isFavourite);
                     favouriteFab.setVisibility(View.VISIBLE);
-                    Timber.d("(database) %s", movie.toString());
                 }, Timber::e);
-
     }
 
     static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
@@ -197,25 +203,22 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     };
 
     private void fetchReviews(int id) {
-        movieRepository.fetchMovieReviews(id)
+        compositeDisposable.add(movieRepository.fetchMovieReviews(id)
             .subscribe(
                     reviews -> reviewAdapter.setReviews(reviews),
-                    this::handleReviewLoadingError);
+                    this::handleReviewLoadingError));
     }
 
     private void fetchTrailers(int id) {
-        movieRepository.fetchMovieTrailers(id)
+        compositeDisposable.add(movieRepository.fetchMovieTrailers(id)
             .subscribe(
                     trailers -> trailerAdapter.setTrailers(trailers),
-                    this::handleReviewLoadingError
-            );
+                    this::handleReviewLoadingError));
     }
 
     private void handleReviewLoadingError(@NonNull Throwable error) {
         Timber.e(error);
     }
-
-
 
     @Override
     public void onTrailerClick(@NonNull Trailer trailer) {
@@ -241,6 +244,11 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
 
         boolean isFavourite = ! movie.isFavourite();
         setIsFavouriteView(isFavourite);
-        Timber.d("(fab clicked) %s", movie.toString());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }
