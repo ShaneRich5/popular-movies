@@ -4,6 +4,7 @@
     <string name="label_main_activity">Pop Activity</string>
     <string name="label_movie_detail_activity">MovieDetail</string>
     <string name="error_icon">Error icon</string>
+    <string name="error_loading_message">Error loading movie</string>
     <string name="synopsis_icon">description_synopsis_icon</string>
     <string name="rating_icon">Rating icon</string>
     <string name="release_date_icon">Release date icon</string>
@@ -16,15 +17,15 @@
     <string name="title_activity_settings">Settings</string>
 
     <string name="pref_sort_by_title">Sort by</string>
-    <string name="pref_sort_by_key">sort_by</string>
+    <string name="pref_sort_by_key" translatable="false">sort_by</string>
 
     <string name="pref_popular_label">Popular</string>
     <string name="pref_top_rated_label">Top Rated</string>
 
-    <string name="pref_popular_value">popular</string>
-    <string name="pref_top_rated_value">top_rated</string>
+    <string name="pref_popular_value" translatable="false">popular</string>
+    <string name="pref_top_rated_value" translatable="false">top_rated</string>
 
-    <string name="pref_favourite_key">favourite</string>
+    <string name="pref_favourite_key" translatable="false">favourite</string>
     <string name="pref_favourite_title">Show Favourites</string>
 
     <string name="pref_favourite_off_summary">All Movies Shown</string>
@@ -37,6 +38,4 @@
     <string name="menu_refresh">Refresh</string>
     <string name="action_share">Share</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

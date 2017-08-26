@@ -133,6 +133,10 @@ public class Movie implements Parcelable {
         return String.format(Locale.getDefault(), "Movie: {%d, %s, %b}", id, title, isFavourite);
     }
 
+    public String buildPosterUrl() {
+        return "http://image.tmdb.org/t/p/w185/" + getPosterPath();
+    }
+
     public static final class Builder implements Buildable {
         private final ContentValues values = new ContentValues();
 

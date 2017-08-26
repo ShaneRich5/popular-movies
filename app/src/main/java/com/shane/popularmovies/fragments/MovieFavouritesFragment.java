@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.shane.popularmovies.R;
 import com.shane.popularmovies.models.Movie;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class MovieFavouritesFragment extends MovieListFragment {
 
     private void handleLoadError(Throwable error) {
         Timber.e(error);
-        showErrorMessage("Failed to load movies");
+        showErrorMessage(getString(R.string.error_loading_message));
     }
 
     private void handleMoviesLoaded(@NonNull List<Movie> movies) {

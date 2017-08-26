@@ -29,7 +29,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#50000000"
+            android:background="@color/gray_transparent"
             app:layout_constraintLeft_toLeftOf="@id/thumbnail_image_view"
             app:layout_constraintRight_toRightOf="@id/thumbnail_image_view"
             app:layout_constraintTop_toTopOf="@id/thumbnail_image_view"

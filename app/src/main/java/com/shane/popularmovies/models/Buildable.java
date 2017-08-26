@@ -7,5 +7,5 @@ import android.content.ContentValues;
  */
 
 public interface Buildable {
-    public ContentValues build();
+    ContentValues build();
 }

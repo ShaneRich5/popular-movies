@@ -17,7 +17,6 @@ import com.shane.popularmovies.models.Movie;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class MovieDetailActivity extends AppCompatActivity {
     public static final String EXTRA_MOVIE = "EXTRA_MOVIE";
@@ -41,9 +40,8 @@ public class MovieDetailActivity extends AppCompatActivity {
             final Movie movie = retrieveMovieFromIntent();
             createMovieFragment(movie);
         } else {
-            final String errorMessage = "Error loading movie";
+            final String errorMessage = getString(R.string.error_loading_message);
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
-            Timber.d("Movie not retrieved from intent");
             finish();
         }
     }

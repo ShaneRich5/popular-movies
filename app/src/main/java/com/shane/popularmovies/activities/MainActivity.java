@@ -27,7 +27,6 @@ import com.shane.popularmovies.utils.PreferenceUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements MovieAdapter.MovieAdapterOnClickHandler,
@@ -131,7 +130,6 @@ public class MainActivity extends AppCompatActivity
         if (key.equals(favouriteKey)) {
             boolean shouldShowFavourite = PreferenceUtils.getShouldShowFavourites(this);
             addFragmentToScreen(shouldShowFavourite);
-            Timber.i("Showing favourite fragment %b", shouldShowFavourite);
         }
     }
 }

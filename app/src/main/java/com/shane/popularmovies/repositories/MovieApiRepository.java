@@ -22,7 +22,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by Shane on 8/5/2017.
@@ -73,7 +72,6 @@ public class MovieApiRepository implements MovieRepository {
         final Cursor cursor = context.getContentResolver().query(queryUri, null, null, null, null);
 
         if (null == cursor) {
-            Timber.d("saveFavourite: Empty cursor");
             return;
         }
 

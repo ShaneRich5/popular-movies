@@ -20,7 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import timber.log.Timber;
 
 /**
  * Created by Shane on 8/5/2017.
@@ -69,8 +68,6 @@ public interface MovieApi {
             final HttpUrl urlWithToken = originalUrl.newBuilder()
                     .addQueryParameter("api_key", token)
                     .build();
-
-            Timber.i(urlWithToken.toString());
 
             final Request tokenRequest = originalRequest.newBuilder()
                     .url(urlWithToken).build();

@@ -11,7 +11,7 @@
         android:defaultValue="@string/pref_popular_value" />
 
     <SwitchPreferenceCompat
-        android:title="Show Favourites"
+        android:title="@string/pref_favourite_title"
         android:key="@string/pref_favourite_key"
         android:summaryOn="@string/pref_favourite_on_summary"
         android:summaryOff="@string/pref_favourite_off_summary"

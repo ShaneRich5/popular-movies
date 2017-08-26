@@ -170,7 +170,8 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         releaseDateTextView.setText(friendlyDate);
 
         Picasso.with(getContext())
-                .load("http://image.tmdb.org/t/p/w342/" + movie.getPosterPath())
+                .load(movie.buildPosterUrl())
+                .error(R.mipmap.ic_launcher)
                 .into(posterImageView);
 
         int id = movie.getId();

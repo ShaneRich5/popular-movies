@@ -50,8 +50,6 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase database = movieDbHelper.getReadableDatabase();
         Cursor cursor;
 
-        Timber.d("Uri CP: " + uri);
-
         switch (uriMatcher.match(uri)) {
             case CODE_MOVIES:
                 cursor = database.query(MovieEntry.TABLE_NAME, projection, selection,
@@ -71,7 +69,6 @@ public class MovieProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        Timber.d("Cursor CP: " + cursor.toString());
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
@@ -102,7 +99,6 @@ public class MovieProvider extends ContentProvider {
                     Timber.e(exception);
                     throw exception;
                 }
-                Timber.i("db insert called: %d", id);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
