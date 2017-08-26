@@ -81,6 +81,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final static int FADE_DURATION = 1000; // in milliseconds
+
         @BindView(R.id.poster_image_view) ImageView posterImageView;
 
         MovieViewHolder(View itemView) {
