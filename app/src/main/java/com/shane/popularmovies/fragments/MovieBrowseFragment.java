@@ -27,6 +27,7 @@ import timber.log.Timber;
 
 public class MovieBrowseFragment extends MovieListFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener  {
+    public static final String TAG = MovieBrowseFragment.class.getName();
 
     private String sortOrder;
 
@@ -157,7 +158,7 @@ public class MovieBrowseFragment extends MovieListFragment
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.GONE);
-        errorMessageTextView.setVisibility(View.VISIBLE);
+        errorLinearLayout.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {

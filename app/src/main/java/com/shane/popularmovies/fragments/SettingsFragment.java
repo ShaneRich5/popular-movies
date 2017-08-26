@@ -13,6 +13,8 @@ import android.support.v7.preference.SwitchPreferenceCompat;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.utils.PreferenceUtils;
 
+import timber.log.Timber;
+
 /**
  * Created by Shane on 8/17/2017.
  */
@@ -56,6 +58,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         if (key.equals(sortOrderKey)) {
             final String value = PreferenceUtils.getSortOrder(getContext());
             setPreferenceSummary(preference, value);
+        } else if (key.equals(getString(R.string.pref_favourite_key))) {
+            Timber.i("Favourite preference: %b", PreferenceUtils.getShouldShowFavourites(getContext()));
         }
     }
 

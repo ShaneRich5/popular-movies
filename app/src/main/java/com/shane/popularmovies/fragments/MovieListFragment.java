@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -31,7 +32,7 @@ public abstract class MovieListFragment extends Fragment
     protected MovieRepository movieRepository;
     protected GridLayoutManager gridLayoutManager;
 
-
+    @BindView(R.id.error_layout) LinearLayout errorLinearLayout;
     @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
