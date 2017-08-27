@@ -2,6 +2,7 @@ package com.shane.popularmovies.fragments;
 
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,16 +17,23 @@ import android.widget.TextView;
 import com.shane.popularmovies.GridSpaceItemDecoration;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
+import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.annotations.NonNull;
 
 
 public abstract class MovieListFragment extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener {
+    public static final String GRID_STATE = "grid_state";
+    public static final String GRID_ITEMS = "grid_items";
 
     protected MovieAdapter movieAdapter;
     protected MovieRepository movieRepository;
@@ -39,29 +47,20 @@ public abstract class MovieListFragment extends Fragment
     public MovieListFragment() {}
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_movie_list, container, false);
         ButterKnife.bind(this, view);
-        return view;
-    }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
-        final int NUM_OF_GRID_COLUMNS = 2;
+        final int NUM_OF_GRID_COLUMNS = getResources().getInteger(R.integer.movie_grid_column_count);
         final int PIXEL_GRID_SPACING = 10;
 
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
         gridLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
+
         movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(PIXEL_GRID_SPACING));
         movieListRecyclerView.setLayoutManager(gridLayoutManager);
         movieListRecyclerView.setHasFixedSize(true);
@@ -72,6 +71,55 @@ public abstract class MovieListFragment extends Fragment
 
         movieAdapter = new MovieAdapter(getContext(), (MovieAdapter.MovieAdapterOnClickHandler) getActivity());
         movieListRecyclerView.setAdapter(movieAdapter);
+
+
+        if (savedInstanceState != null) {
+            final Parcelable gridState = savedInstanceState.getParcelable(GRID_STATE);
+            final List<Movie> movies = savedInstanceState.getParcelableArrayList(GRID_ITEMS);
+            if (movies != null) handleMoviesLoaded(movies);
+            gridLayoutManager.onRestoreInstanceState(gridState);
+        }
+
         swipeRefreshLayout.setOnRefreshListener(this);
+
+
+
+        return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (outState == null) return;
+        if (gridLayoutManager != null) {
+            Parcelable gridState = gridLayoutManager.onSaveInstanceState();
+            outState.putParcelable(GRID_STATE, gridState);
+            outState.putParcelableArrayList(GRID_ITEMS, new ArrayList<Parcelable>(movieAdapter.getMovies()));
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            final Parcelable gridState = savedInstanceState.getParcelable(GRID_STATE);
+            final List<Movie> movies = savedInstanceState.getParcelableArrayList(GRID_ITEMS);
+            if (movies != null) handleMoviesLoaded(movies);
+            gridLayoutManager.onRestoreInstanceState(gridState);
+        }
+    }
+
+    public abstract void handleMoviesLoaded(List<Movie> movies);
+
+    public abstract void handlerLoadingError(@NonNull Throwable error);
+
+    protected void showLoading() {
+        loadingProgressBar.setVisibility(View.VISIBLE);
+        errorMessageTextView.setVisibility(View.GONE);
+    }
+
+    protected void handleLoadingComplete() {
+        loadingProgressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 }

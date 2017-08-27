@@ -29,9 +29,12 @@ import timber.log.Timber;
 public class MovieBrowseFragment extends MovieListFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener  {
     public static final String TAG = MovieBrowseFragment.class.getName();
+    public static final String CURRENT_PAGE = "current_page";
+
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private String sortOrder;
+    private int page = 0;
 
     protected EndlessRecyclerOnScrollListener scrollListener;
 
@@ -55,8 +58,12 @@ public class MovieBrowseFragment extends MovieListFragment
             }
         };
 
-        movieListRecyclerView.addOnScrollListener(scrollListener);
-        loadMoviesOnFirstPage();
+        if (savedInstanceState == null) {
+            loadMoviesOnFirstPage();
+            movieListRecyclerView.addOnScrollListener(scrollListener);
+        } else {
+            page = savedInstanceState.getInt(CURRENT_PAGE, 0);
+        }
     }
 
     @Override
@@ -115,7 +122,7 @@ public class MovieBrowseFragment extends MovieListFragment
         compositeDisposable.add(fetchMoviesBySortOrder(sortOrder, page)
                 .doOnSubscribe(disposable -> showLoading())
                 .subscribe(
-                        movies -> this.handleMoviesLoaded(movies, page),
+                        movies -> this.handleMoviesLoaded(movies),
                         this::handlerLoadingError,
                         this::handleLoadingComplete));
     }
@@ -134,19 +141,17 @@ public class MovieBrowseFragment extends MovieListFragment
         return movieRepository.fetchMovies(sortOrder, page);
     }
 
-    private void handleLoadingComplete() {
-        loadingProgressBar.setVisibility(View.GONE);
-        swipeRefreshLayout.setRefreshing(false);
-    }
-
-    private void handleMoviesLoaded(@NonNull List<Movie> movies, int page) {
+    @Override
+    public void handleMoviesLoaded(@NonNull List<Movie> movies) {
+        page++;
         movieListRecyclerView.setVisibility(View.VISIBLE);
         errorMessageTextView.setVisibility(View.GONE);
         if (page == 1) movieAdapter.setMovies(movies);
         else movieAdapter.addMovies(movies);
     }
 
-    private void handlerLoadingError(@NonNull Throwable error) {
+    @Override
+    public void handlerLoadingError(@NonNull Throwable error) {
         if (error instanceof UnknownHostException) {
             showErrorMessage("Please connect to the internet");
         } else {
@@ -161,14 +166,15 @@ public class MovieBrowseFragment extends MovieListFragment
         errorMessageTextView.setVisibility(View.VISIBLE);
     }
 
-    private void showLoading() {
-        loadingProgressBar.setVisibility(View.VISIBLE);
-        errorMessageTextView.setVisibility(View.GONE);
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         compositeDisposable.clear();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_PAGE, page);
     }
 }

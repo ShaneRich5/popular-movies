@@ -47,6 +47,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         notifyDataSetChanged();
     }
 
+    public List<Movie> getMovies() {
+        return new ArrayList<>(movies);
+    }
 
     public void addMovies(@NonNull List<Movie> movies) {
         this.movies.addAll(movies);

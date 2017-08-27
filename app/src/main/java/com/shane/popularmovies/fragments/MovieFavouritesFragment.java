@@ -37,32 +37,30 @@ public class MovieFavouritesFragment extends MovieListFragment {
                 })
                 .subscribe(
                         this::handleMoviesLoaded,
-                        this::handleLoadError,
+                        this::handlerLoadingError,
                         this::handleLoadComplete
                 ));
     }
 
-    private void showLoading() {
-        errorMessageTextView.setVisibility(View.GONE);
-        loadingProgressBar.setVisibility(View.VISIBLE);
-    }
 
     private void handleLoadComplete() {
         loadingProgressBar.setVisibility(View.GONE);
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    private void handleLoadError(Throwable error) {
-        Timber.e(error);
-        showErrorMessage(getString(R.string.error_loading_message));
-    }
-
-    private void handleMoviesLoaded(@NonNull List<Movie> movies) {
+    @Override
+    public void handleMoviesLoaded(@NonNull List<Movie> movies) {
         loadingProgressBar.setVisibility(View.GONE);
         errorMessageTextView.setVisibility(View.GONE);
         movieListRecyclerView.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setRefreshing(false);
         movieAdapter.setMovies(movies);
+    }
+
+    @Override
+    public void handlerLoadingError(@NonNull Throwable error) {
+        Timber.e(error);
+        showErrorMessage(getString(R.string.error_loading_message));
     }
 
     private void showErrorMessage(@NonNull String message) {

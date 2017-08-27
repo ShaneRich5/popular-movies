@@ -223,10 +223,13 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
 
     @Override
     public void onTrailerClick(@NonNull Trailer trailer) {
-        final String url = trailer.buildVideoUrl();
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(url));
-        startActivity(intent);
+        final String videoUrl = trailer.buildVideoUrl();
+        final Uri videoUri = Uri.parse(videoUrl);
+        final Intent trailerIntent = new Intent(Intent.ACTION_VIEW, videoUri);
+
+        if (trailerIntent.resolveActivity(getContext().getPackageManager()) != null) {
+            startActivity(trailerIntent);
+        }
     }
 
     private void setIsFavouriteView(boolean isFavourite) {
