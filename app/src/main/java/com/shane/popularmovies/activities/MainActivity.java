@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.fragment_movie_list) FrameLayout frameLayout;
+    @BindView(R.id.fragment_browse_movie_list) FrameLayout browseMovieLayout;
+    @BindView(R.id.fragment_favourite_movie_list) FrameLayout favouriteMovieLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +43,15 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        if (getSupportFragmentManager().findFragmentById(frameLayout.getId()) == null) {
-            addFragmentToScreen(PreferenceUtils.getShouldShowFavourites(this));
+        if (savedInstanceState == null) {
+            final FragmentManager fragmentManager = getSupportFragmentManager();
+            final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(favouriteMovieLayout.getId(), MovieFavouritesFragment.newInstance());
+            fragmentTransaction.replace(browseMovieLayout.getId(), MovieBrowseFragment.newInstance());
+            fragmentTransaction.commit();
         }
+
+        addFragmentToScreen(PreferenceUtils.getShouldShowFavourites(this));
     }
 
     @Override
@@ -68,24 +75,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addFragmentToScreen(boolean shouldShowFavourites) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        if ( ! shouldFragmentBeReplaced(shouldShowFavourites)) return;
-
-        if (shouldShowFavourites) {
-            transaction.replace(frameLayout.getId(), new MovieFavouritesFragment(), MovieFavouritesFragment.TAG);
-        } else {
-            transaction.replace(frameLayout.getId(), new MovieBrowseFragment(), MovieBrowseFragment.TAG);
-        }
-        transaction.commit();
-    }
-
-    private boolean shouldFragmentBeReplaced(boolean shouldShowFavourites) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(frameLayout.getId());
-        return fragment == null
-                || ((fragment instanceof MovieFavouritesFragment && !shouldShowFavourites)
-                || (fragment instanceof MovieBrowseFragment && shouldShowFavourites));
+        browseMovieLayout.setVisibility((shouldShowFavourites) ? View.GONE : View.VISIBLE);
+        favouriteMovieLayout.setVisibility((shouldShowFavourites) ? View.VISIBLE : View.GONE);
     }
 
     @Override

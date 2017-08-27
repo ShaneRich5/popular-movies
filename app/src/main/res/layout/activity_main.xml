@@ -9,8 +9,15 @@
     <include layout="@layout/partial_toolbar"/>
 
     <FrameLayout
-        android:id="@+id/fragment_movie_list"
+        android:id="@+id/fragment_browse_movie_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/fragment_favourite_movie_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
 </LinearLayout>

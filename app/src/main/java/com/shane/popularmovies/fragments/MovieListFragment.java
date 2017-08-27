@@ -32,14 +32,15 @@ import io.reactivex.annotations.NonNull;
 
 public abstract class MovieListFragment extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener {
-    public static final String GRID_STATE = "grid_state";
-    public static final String GRID_ITEMS = "grid_items";
+    public static final String TAG = MovieListFragment.class.getName();
+    public static final String MOVIE_GRID_STATE = "movie_grid_state";
+    public static final String MOVIE_GRID_ITEMS = "movie_grid_items";
 
     protected MovieAdapter movieAdapter;
     protected MovieRepository movieRepository;
-    protected GridLayoutManager gridLayoutManager;
+    protected GridLayoutManager movieLayoutManager;
 
-    @BindView(R.id.movie_list_recycler) RecyclerView movieListRecyclerView;
+    @BindView(R.id.movie_list_recycler) RecyclerView movieRecyclerView;
     @BindView(R.id.load_progress_bar) ProgressBar loadingProgressBar;
     @BindView(R.id.error_message_text_view) TextView errorMessageTextView;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
@@ -59,30 +60,22 @@ public abstract class MovieListFragment extends Fragment
         MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
         movieRepository = new MovieApiRepository(api, getContext());
 
-        gridLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
+        movieLayoutManager = new GridLayoutManager(getContext(), NUM_OF_GRID_COLUMNS);
 
-        movieListRecyclerView.addItemDecoration(new GridSpaceItemDecoration(PIXEL_GRID_SPACING));
-        movieListRecyclerView.setLayoutManager(gridLayoutManager);
-        movieListRecyclerView.setHasFixedSize(true);
+        movieRecyclerView.addItemDecoration(new GridSpaceItemDecoration(PIXEL_GRID_SPACING));
+        movieRecyclerView.setLayoutManager(movieLayoutManager);
+        movieRecyclerView.setHasFixedSize(true);
 
         if (!(getActivity() instanceof MovieAdapter.MovieAdapterOnClickHandler)) {
             throw new ClassCastException("Activity must implement MovieAdapterOnClickHandler");
         }
 
         movieAdapter = new MovieAdapter(getContext(), (MovieAdapter.MovieAdapterOnClickHandler) getActivity());
-        movieListRecyclerView.setAdapter(movieAdapter);
+        movieRecyclerView.setAdapter(movieAdapter);
 
-
-        if (savedInstanceState != null) {
-            final Parcelable gridState = savedInstanceState.getParcelable(GRID_STATE);
-            final List<Movie> movies = savedInstanceState.getParcelableArrayList(GRID_ITEMS);
-            if (movies != null) handleMoviesLoaded(movies);
-            gridLayoutManager.onRestoreInstanceState(gridState);
-        }
+        if (savedInstanceState != null) restoreState(savedInstanceState);
 
         swipeRefreshLayout.setOnRefreshListener(this);
-
-
 
         return view;
     }
@@ -91,22 +84,26 @@ public abstract class MovieListFragment extends Fragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (outState == null) return;
-        if (gridLayoutManager != null) {
-            Parcelable gridState = gridLayoutManager.onSaveInstanceState();
-            outState.putParcelable(GRID_STATE, gridState);
-            outState.putParcelableArrayList(GRID_ITEMS, new ArrayList<Parcelable>(movieAdapter.getMovies()));
-        }
+        saveState(outState);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            final Parcelable gridState = savedInstanceState.getParcelable(GRID_STATE);
-            final List<Movie> movies = savedInstanceState.getParcelableArrayList(GRID_ITEMS);
-            if (movies != null) handleMoviesLoaded(movies);
-            gridLayoutManager.onRestoreInstanceState(gridState);
-        }
+        if (savedInstanceState != null) restoreState(savedInstanceState);
+    }
+
+    private void saveState(@NonNull Bundle outState) {
+        final Parcelable gridState = movieRecyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(MOVIE_GRID_STATE, gridState);
+        outState.putParcelableArrayList(MOVIE_GRID_ITEMS, new ArrayList<Parcelable>(movieAdapter.getMovies()));
+    }
+
+    private void restoreState(@NonNull Bundle savedInstanceState) {
+        final Parcelable gridState = savedInstanceState.getParcelable(MOVIE_GRID_STATE);
+        final List<Movie> movies = savedInstanceState.getParcelableArrayList(MOVIE_GRID_ITEMS);
+        if (movies != null) handleMoviesLoaded(movies);
+        movieRecyclerView.getLayoutManager().onRestoreInstanceState(gridState);
     }
 
     public abstract void handleMoviesLoaded(List<Movie> movies);

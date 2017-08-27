@@ -31,8 +31,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         setupToolbar();
-        createFragmentWithMovieFromIntent();
-        retrieveMovieFromIntent();
+
+        if (savedInstanceState == null) createFragmentWithMovieFromIntent();
     }
 
     private void createFragmentWithMovieFromIntent() {

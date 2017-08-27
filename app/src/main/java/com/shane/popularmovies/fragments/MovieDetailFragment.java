@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.activities.MovieDetailActivity;
 import com.shane.popularmovies.adapters.ReviewAdapter;
@@ -30,6 +32,7 @@ import com.shane.popularmovies.adapters.TrailerAdapter;
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
 import com.shane.popularmovies.data.MovieDbHelper;
 import com.shane.popularmovies.models.Movie;
+import com.shane.popularmovies.models.Review;
 import com.shane.popularmovies.models.Trailer;
 import com.shane.popularmovies.network.MovieApi;
 import com.shane.popularmovies.repositories.MovieApiRepository;
@@ -39,6 +42,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.sqlbrite2.BriteDatabase;
 import com.squareup.sqlbrite2.SqlBrite;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,21 +57,32 @@ import timber.log.Timber;
 
 public class MovieDetailFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
+
+    public static final String SCROLL_POSITION = "scroll_position";
+    public static final String TRAILER_LIST_ITEMS = "trailer_list_items";
+    public static final String REVIEW_LIST_ITEMS = "review_list_items";
+
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    @BindView(R.id.scroll_view) ObservableScrollView scrollView;
     @BindView(R.id.poster_image_view) ImageView posterImageView;
     @BindView(R.id.ratings_text_view) TextView ratingsTextView;
     @BindView(R.id.synopsis_text_view) TextView synopsisTextView;
     @BindView(R.id.favourite_fab) FloatingActionButton favouriteFab;
     @BindView(R.id.release_data_text_view) TextView releaseDateTextView;
-    @BindView(R.id.trailer_recycler_view) RecyclerView trailerRecyclerView;
     @BindView(R.id.review_recycler_view) RecyclerView reviewRecyclerView;
+    @BindView(R.id.trailer_recycler_view) RecyclerView trailerRecyclerView;
 
     private ReviewAdapter reviewAdapter;
     private TrailerAdapter trailerAdapter;
 
     private MovieRepository movieRepository;
     private Movie movie;
+
+    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
+        final Cursor cursor = query.run();
+        return ! (cursor == null || cursor.getCount() <= 0);
+    };
 
     public static MovieDetailFragment newInstance(@NonNull Movie movie) {
         MovieDetailFragment fragment = new MovieDetailFragment();
@@ -90,16 +105,47 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         ButterKnife.bind(this, view);
         Timber.tag(TAG);
 
-        MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
-        movieRepository = new MovieApiRepository(api, getContext());
-
-        if (getArguments() != null) {
-            movie = getArguments().getParcelable(MovieDetailActivity.EXTRA_MOVIE);
-            if (movie != null) setMovie(movie);
-        }
-        setupLayout();
+        if (savedInstanceState == null) Timber.d("Null in onCreate");
         return view;
     }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        final MovieApi api = MovieApi.Factory.create(getString(R.string.themoviedb_key));
+        movieRepository = new MovieApiRepository(api, getContext());
+
+        movie = getArguments().getParcelable(MovieDetailActivity.EXTRA_MOVIE);
+        setMovie(movie);
+
+
+        reviewAdapter = new ReviewAdapter(getContext());
+        trailerAdapter = new TrailerAdapter(getContext(), this);
+
+        final LinearLayoutManager trailerLayoutManager =
+                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+
+        final LinearLayoutManager reviewLayoutManager =
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false) {
+                    @Override
+                    public boolean canScrollVertically() {
+                        return false;
+                    }
+                };
+
+        trailerRecyclerView.setLayoutManager(trailerLayoutManager);
+        reviewRecyclerView.setLayoutManager(reviewLayoutManager);
+
+        trailerRecyclerView.setAdapter(trailerAdapter);
+        reviewRecyclerView.setAdapter(reviewAdapter);
+
+        checkIfMovieIsFavoured();
+
+
+    }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -117,7 +163,7 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     }
 
     private void shareFirstTrailer() {
-        List<Trailer> trailers = trailerAdapter.getTrailers();
+        final List<Trailer> trailers = trailerAdapter.getTrailers();
         if (trailers.size() == 0) {
             Toast.makeText(getContext(), "No trailers to share", Toast.LENGTH_SHORT).show();
             return;
@@ -132,27 +178,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                 .getIntent();
 
         startActivity(shareIntent);
-    }
-
-    private void setupLayout() {
-        reviewAdapter = new ReviewAdapter(getContext());
-        trailerAdapter = new TrailerAdapter(getContext(), this);
-
-        LinearLayoutManager horizontalLayoutManager =
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        LinearLayoutManager verticalLayoutManager =
-                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false) {
-                    @Override
-                    public boolean canScrollVertically() {
-                        return false;
-                    }
-                };
-
-        trailerRecyclerView.setLayoutManager(horizontalLayoutManager);
-        reviewRecyclerView.setLayoutManager(verticalLayoutManager);
-
-        trailerRecyclerView.setAdapter(trailerAdapter);
-        reviewRecyclerView.setAdapter(reviewAdapter);
     }
 
     private void setMovie(@NonNull Movie movie) {
@@ -173,12 +198,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                 .load(movie.buildPosterUrl())
                 .error(R.mipmap.ic_launcher)
                 .into(posterImageView);
-
-        int id = movie.getId();
-
-        fetchReviews(id);
-        fetchTrailers(id);
-        checkIfMovieIsFavoured();
     }
 
     private void checkIfMovieIsFavoured() {
@@ -192,29 +211,17 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
                 .map(IS_FAVOURITE_MAPPER)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isFavourite -> {
-                    setIsFavouriteView(isFavourite);
-                    favouriteFab.setVisibility(View.VISIBLE);
-                }, Timber::e);
+                .subscribe(this::setIsFavouriteView, Timber::e);
     }
-
-    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
-        final Cursor cursor = query.run();
-        return ! (cursor == null || cursor.getCount() <= 0);
-    };
 
     private void fetchReviews(int id) {
         compositeDisposable.add(movieRepository.fetchMovieReviews(id)
-            .subscribe(
-                    reviews -> reviewAdapter.setReviews(reviews),
-                    this::handleReviewLoadingError));
+            .subscribe(this::handleReviewsLoaded, this::handleReviewLoadingError));
     }
 
     private void fetchTrailers(int id) {
         compositeDisposable.add(movieRepository.fetchMovieTrailers(id)
-            .subscribe(
-                    trailers -> trailerAdapter.setTrailers(trailers),
-                    this::handleReviewLoadingError));
+            .subscribe(this::handleTrailersLoaded, this::handleReviewLoadingError));
     }
 
     private void handleReviewLoadingError(@NonNull Throwable error) {
@@ -254,5 +261,55 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     public void onDestroy() {
         super.onDestroy();
         compositeDisposable.clear();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        final List<Trailer> trailers = trailerAdapter.getTrailers();
+        final List<Review> reviews = reviewAdapter.getReviews();
+
+        outState.putParcelableArrayList(TRAILER_LIST_ITEMS, new ArrayList<>(trailers));
+        outState.putParcelableArrayList(REVIEW_LIST_ITEMS, new ArrayList<>(reviews));
+        outState.putParcelable(SCROLL_POSITION, scrollView.onSaveInstanceState());
+        Timber.d("(Saved) Position: %d %d", scrollView.getScrollX(), scrollView.getScrollY());
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+//        if (savedInstanceState != null) restoreState(savedInstanceState);
+        int id = movie.getId();
+
+        if (savedInstanceState == null) {
+            Timber.d("made requests, no scroll up");
+            fetchReviews(id);
+            fetchTrailers(id);
+            return;
+        }
+
+        final Parcelable scrollState = savedInstanceState.getParcelable(SCROLL_POSITION);
+
+        List<Trailer> trailers = savedInstanceState.getParcelableArrayList(TRAILER_LIST_ITEMS);
+        List<Review> reviews = savedInstanceState.getParcelableArrayList(REVIEW_LIST_ITEMS);
+
+        if (trailers == null) fetchTrailers(id);
+        else trailerAdapter.setTrailers(trailers);
+
+        if (reviews == null) fetchReviews(id);
+        else reviewAdapter.setReviews(reviews);
+
+        if (scrollState != null) scrollView.onRestoreInstanceState(scrollState);
+    }
+
+    private void restoreState(@NonNull Bundle savedInstanceState) {
+    }
+
+    private void handleReviewsLoaded(@NonNull List<Review> reviews) {
+        reviewAdapter.setReviews(reviews);
+    }
+
+    private void handleTrailersLoaded(@NonNull List<Trailer> trailers) {
+        trailerAdapter.setTrailers(trailers);
     }
 }

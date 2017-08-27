@@ -3,6 +3,8 @@ package com.shane.popularmovies.models;
 import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
@@ -15,12 +17,25 @@ import java.util.Locale;
 
 public class Movie implements Parcelable {
 
-    @SerializedName("id") private int id;
-    @SerializedName("title") private String title;
-    @SerializedName("poster_path") private String posterPath;
-    @SerializedName("overview") private String synopsis;
-    @SerializedName("vote_average") private double ratings;
-    @SerializedName("release_date") private String releaseDate;
+    @SerializedName("id")
+    private int id;
+
+    @NonNull
+    @SerializedName("title")
+    private String title;
+
+    @Nullable
+    @SerializedName("poster_path")
+    private String posterPath;
+
+    @SerializedName("overview")
+    private String synopsis;
+
+    @SerializedName("vote_average")
+    private double ratings;
+
+    @SerializedName("release_date")
+    private String releaseDate;
 
     private boolean isFavourite = false;
 
@@ -90,6 +105,16 @@ public class Movie implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "Movie: {%d, %s, %b}", id, title, isFavourite);
+    }
+
+    public String buildPosterUrl() {
+        return "http://image.tmdb.org/t/p/w185/" + getPosterPath();
+    }
+
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -126,15 +151,6 @@ public class Movie implements Parcelable {
         ratings = in.readDouble();
         releaseDate = in.readString();
         isFavourite = in.readByte() != 0;
-    }
-
-    @Override
-    public String toString() {
-        return String.format(Locale.getDefault(), "Movie: {%d, %s, %b}", id, title, isFavourite);
-    }
-
-    public String buildPosterUrl() {
-        return "http://image.tmdb.org/t/p/w185/" + getPosterPath();
     }
 
     public static final class Builder implements Buildable {

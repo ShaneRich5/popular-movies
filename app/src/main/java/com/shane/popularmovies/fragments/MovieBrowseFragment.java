@@ -38,6 +38,10 @@ public class MovieBrowseFragment extends MovieListFragment
 
     protected EndlessRecyclerOnScrollListener scrollListener;
 
+    public static MovieBrowseFragment newInstance() {
+        return new MovieBrowseFragment();
+    }
+
     public MovieBrowseFragment() {
     }
 
@@ -51,7 +55,7 @@ public class MovieBrowseFragment extends MovieListFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        scrollListener = new EndlessRecyclerOnScrollListener(gridLayoutManager) {
+        scrollListener = new EndlessRecyclerOnScrollListener(movieLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
                 fetchMovies(currentPage);
@@ -60,7 +64,7 @@ public class MovieBrowseFragment extends MovieListFragment
 
         if (savedInstanceState == null) {
             loadMoviesOnFirstPage();
-            movieListRecyclerView.addOnScrollListener(scrollListener);
+            movieRecyclerView.addOnScrollListener(scrollListener);
         } else {
             page = savedInstanceState.getInt(CURRENT_PAGE, 0);
         }
@@ -121,9 +125,7 @@ public class MovieBrowseFragment extends MovieListFragment
     private void fetchMovies(int page) {
         compositeDisposable.add(fetchMoviesBySortOrder(sortOrder, page)
                 .doOnSubscribe(disposable -> showLoading())
-                .subscribe(
-                        movies -> this.handleMoviesLoaded(movies),
-                        this::handlerLoadingError,
+                .subscribe(this::handleMoviesLoaded, this::handlerLoadingError,
                         this::handleLoadingComplete));
     }
 
@@ -144,7 +146,7 @@ public class MovieBrowseFragment extends MovieListFragment
     @Override
     public void handleMoviesLoaded(@NonNull List<Movie> movies) {
         page++;
-        movieListRecyclerView.setVisibility(View.VISIBLE);
+        movieRecyclerView.setVisibility(View.VISIBLE);
         errorMessageTextView.setVisibility(View.GONE);
         if (page == 1) movieAdapter.setMovies(movies);
         else movieAdapter.addMovies(movies);

@@ -23,6 +23,10 @@ public class MovieFavouritesFragment extends MovieListFragment {
     public static final String TAG = MovieFavouritesFragment.class.getName();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    public static MovieFavouritesFragment newInstance() {
+        return new MovieFavouritesFragment();
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -52,7 +56,7 @@ public class MovieFavouritesFragment extends MovieListFragment {
     public void handleMoviesLoaded(@NonNull List<Movie> movies) {
         loadingProgressBar.setVisibility(View.GONE);
         errorMessageTextView.setVisibility(View.GONE);
-        movieListRecyclerView.setVisibility(View.VISIBLE);
+        movieRecyclerView.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setRefreshing(false);
         movieAdapter.setMovies(movies);
     }
@@ -66,7 +70,7 @@ public class MovieFavouritesFragment extends MovieListFragment {
     private void showErrorMessage(@NonNull String message) {
         errorMessageTextView.setText(message);
         loadingProgressBar.setVisibility(View.GONE);
-        movieListRecyclerView.setVisibility(View.GONE);
+        movieRecyclerView.setVisibility(View.GONE);
         errorMessageTextView.setVisibility(View.VISIBLE);
     }
 

@@ -58,6 +58,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
         notifyDataSetChanged();
     }
 
+    public List<Review> getReviews() {
+        return new ArrayList<>(reviews);
+    }
+
     class ReviewViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.author_text_view) TextView authorTextView;
