@@ -12,10 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
-import com.squareup.sqlbrite2.BriteDatabase;
-import com.squareup.sqlbrite2.SqlBrite;
 
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -82,15 +79,14 @@ public class MovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        final SqlBrite sqlBrite = new SqlBrite.Builder().build();
-        final BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
+        final SQLiteDatabase database = movieDbHelper.getWritableDatabase();
         Uri returnUri;
 
         switch (uriMatcher.match(uri)) {
             case CODE_MOVIES:
                 long id = 0;
                 if (contentValues != null) {
-                    id = database.insert(MovieEntry.TABLE_NAME, contentValues);
+                    id = database.insert(MovieEntry.TABLE_NAME, null, contentValues);
                 }
                 if (id > 0) {
                     returnUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI, id);
@@ -109,8 +105,7 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] arguments) {
-        final SqlBrite sqlBrite = new SqlBrite.Builder().build();
-        final BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
+        final SQLiteDatabase database = movieDbHelper.getWritableDatabase();
         int numberOfRowsDeleted;
 
         if (null == selection) selection = "1";
@@ -122,14 +117,13 @@ public class MovieProvider extends ContentProvider {
             case CODE_MOVIE_WITH_ID:
                 String movieId = uri.getPathSegments().get(1);
                 numberOfRowsDeleted = database.delete(MovieEntry.TABLE_NAME,
-                        MovieEntry.COLUMN_MOVIE_ID + "=?", movieId);
+                        MovieEntry.COLUMN_MOVIE_ID + "=?", new String[]{movieId});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         if (numberOfRowsDeleted != 0) notifyChange(uri);
-        Timber.i("db delete called: %d", numberOfRowsDeleted);
         return numberOfRowsDeleted;
     }
 
