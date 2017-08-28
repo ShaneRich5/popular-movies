@@ -28,6 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.annotations.NonNull;
+import timber.log.Timber;
 
 
 public abstract class MovieListFragment extends Fragment
@@ -52,6 +53,9 @@ public abstract class MovieListFragment extends Fragment
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_movie_list, container, false);
         ButterKnife.bind(this, view);
+
+
+        Timber.d("onCreateView call, bundle null: %b", (savedInstanceState == null));
 
 
         final int NUM_OF_GRID_COLUMNS = getResources().getInteger(R.integer.movie_grid_column_count);
@@ -91,6 +95,7 @@ public abstract class MovieListFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) restoreState(savedInstanceState);
+        Timber.d("onActivityCreated called, bundle null: %b", (savedInstanceState == null));
     }
 
     private void saveState(@NonNull Bundle outState) {

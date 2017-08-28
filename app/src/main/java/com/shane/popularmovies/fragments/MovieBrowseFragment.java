@@ -42,8 +42,7 @@ public class MovieBrowseFragment extends MovieListFragment
         return new MovieBrowseFragment();
     }
 
-    public MovieBrowseFragment() {
-    }
+    public MovieBrowseFragment() {}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,12 +61,18 @@ public class MovieBrowseFragment extends MovieListFragment
             }
         };
 
+
         if (savedInstanceState == null) {
             loadMoviesOnFirstPage();
             movieRecyclerView.addOnScrollListener(scrollListener);
         } else {
             page = savedInstanceState.getInt(CURRENT_PAGE, 0);
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -109,7 +114,6 @@ public class MovieBrowseFragment extends MovieListFragment
             resetRecyclerView();
         }
     }
-
 
     @Override
     public void onRefresh() {

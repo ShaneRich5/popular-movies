@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -27,10 +29,12 @@ import com.shane.popularmovies.utils.PreferenceUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements MovieAdapter.MovieAdapterOnClickHandler,
         SharedPreferences.OnSharedPreferenceChangeListener {
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.fragment_browse_movie_list) FrameLayout browseMovieLayout;
@@ -44,16 +48,39 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        Timber.tag(TAG);
+        Timber.d("onCreate called");
+        Timber.d("is savedInstance null? %b", savedInstanceState == null);
+        addFragmentToScreen(PreferenceUtils.getShouldShowFavourites(this));
 
-        if (savedInstanceState == null) {
-            final FragmentManager fragmentManager = getSupportFragmentManager();
+        attachFragmentByTag(MovieFavouritesFragment.TAG, savedInstanceState);
+        attachFragmentByTag(MovieBrowseFragment.TAG, savedInstanceState);
+    }
+
+    private void attachFragmentByTag(@NonNull String tag, @Nullable Bundle savedInstance) {
+        Fragment fragment = null;
+        if (savedInstance != null) fragment = getSupportFragmentManager().findFragmentByTag(tag);
+
+        if (tag.equals(MovieBrowseFragment.TAG)) {
+            if (fragment == null) fragment = MovieBrowseFragment.newInstance();
+            attachFragment(browseMovieLayout, fragment, tag);
+        } else if (tag.equals(MovieFavouritesFragment.TAG)) {
+            if (fragment == null) fragment = MovieFavouritesFragment.newInstance();
+            attachFragment(favouriteMovieLayout, fragment, tag);
+        }
+    }
+
+    private void attachFragment(@NonNull View layout, @NonNull Fragment fragment, @NonNull String tag) {
+        final int viewId = layout.getId();
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if (// fragmentManager.findFragmentById(viewId) == null &&
+                null == fragmentManager.findFragmentByTag(tag)) {
+            Timber.d("fragment readded %s", tag);
             final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(favouriteMovieLayout.getId(), MovieFavouritesFragment.newInstance());
-            fragmentTransaction.replace(browseMovieLayout.getId(), MovieBrowseFragment.newInstance());
+            fragmentTransaction.replace(viewId, fragment, tag);
             fragmentTransaction.commit();
         }
-
-        addFragmentToScreen(PreferenceUtils.getShouldShowFavourites(this));
     }
 
     @Override
@@ -125,5 +152,18 @@ public class MainActivity extends AppCompatActivity
             boolean shouldShowFavourite = PreferenceUtils.getShouldShowFavourites(this);
             addFragmentToScreen(shouldShowFavourite);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        final MovieFavouritesFragment favouritesFragment = (MovieFavouritesFragment)
+                fragmentManager.findFragmentByTag(MovieFavouritesFragment.TAG);
+        final MovieBrowseFragment browseFragment = (MovieBrowseFragment)
+                fragmentManager.findFragmentByTag(MovieBrowseFragment.TAG);
+        fragmentManager.putFragment(outState, MovieBrowseFragment.TAG, browseFragment);
+        fragmentManager.putFragment(outState, MovieFavouritesFragment.TAG, favouritesFragment);
+        Timber.d("onSaveInstanceState called in MainActivity");
     }
 }
