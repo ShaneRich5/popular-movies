@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.fragment_browse_movie_list) FrameLayout browseMovieLayout;
     @BindView(R.id.fragment_favourite_movie_list) FrameLayout favouriteMovieLayout;
 
+    Switch favouriteSwitch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity
     private void addFragmentToScreen(boolean shouldShowFavourites) {
         browseMovieLayout.setVisibility((shouldShowFavourites) ? View.GONE : View.VISIBLE);
         favouriteMovieLayout.setVisibility((shouldShowFavourites) ? View.VISIBLE : View.GONE);
+        if (favouriteSwitch != null) favouriteSwitch.setChecked(shouldShowFavourites);
     }
 
     @Override
@@ -100,7 +103,7 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_main, menu);
         RelativeLayout switchContainer = (RelativeLayout) menu.findItem(R.id.action_toggle_favourite).getActionView();
-        Switch favouriteSwitch = (Switch) switchContainer.findViewById(R.id.toggle_switch);
+        favouriteSwitch = (Switch) switchContainer.findViewById(R.id.toggle_switch);
         favouriteSwitch.setChecked(PreferenceUtils.getShouldShowFavourites(this));
         favouriteSwitch.setOnCheckedChangeListener((compoundButton, isChecked) ->
                 PreferenceUtils.setShouldShowFavourites(this, isChecked));
