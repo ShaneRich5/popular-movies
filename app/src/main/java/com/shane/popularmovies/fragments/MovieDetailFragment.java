@@ -31,7 +31,6 @@ import com.shane.popularmovies.activities.MovieDetailActivity;
 import com.shane.popularmovies.adapters.ReviewAdapter;
 import com.shane.popularmovies.adapters.TrailerAdapter;
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
-import com.shane.popularmovies.data.MovieDbHelper;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.models.Review;
 import com.shane.popularmovies.models.Trailer;
@@ -40,20 +39,14 @@ import com.shane.popularmovies.repositories.MovieApiRepository;
 import com.shane.popularmovies.repositories.MovieRepository;
 import com.shane.popularmovies.utils.DateUtils;
 import com.squareup.picasso.Picasso;
-import com.squareup.sqlbrite2.BriteDatabase;
-import com.squareup.sqlbrite2.SqlBrite;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static android.R.attr.id;
@@ -135,32 +128,19 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         trailerRecyclerView.setAdapter(trailerAdapter);
         reviewRecyclerView.setAdapter(reviewAdapter);
 
+        final Cursor cursor = getContext().getContentResolver()
+                .query(MovieEntry.buildMovieUriWithId(movie.getId()), null, null, null, null);
 
-        final String selectQuery = String.format(Locale.getDefault(),
-                "SELECT * FROM %s WHERE %s LIKE '%d'",
-                MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
-
-        MovieDbHelper movieDbHelper = new MovieDbHelper(getContext());
-        SqlBrite sqlBrite = new SqlBrite.Builder().build();
-        BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
-        database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
-                .map(IS_FAVOURITE_MAPPER)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isFavourite -> {
-                    Timber.d("(is favourite) movie: %b", isFavourite);
-                    setIsFavouriteView(isFavourite);
-                    favouriteFab.setVisibility(View.VISIBLE);
-                    Timber.d("(database) %s", movie.toString());
-                }, Timber::e);
+        if (null != cursor) {
+            DatabaseUtils.dumpCursor(cursor);
+            boolean isFavourite = cursor.getCount() > 0;
+            Timber.d("(is favourite) movie: %b", isFavourite);
+            setIsFavouriteView(isFavourite);
+            favouriteFab.setVisibility(View.VISIBLE);
+            setIsFavouriteView(isFavourite);
+            cursor.close();
+        }
     }
-
-    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
-        final Cursor cursor = query.run();
-        if (cursor == null) return false;
-        int count = cursor.getCount();
-        cursor.close();
-        return (count > 0);
-    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
