@@ -29,7 +29,6 @@ import com.shane.popularmovies.utils.PreferenceUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements MovieAdapter.MovieAdapterOnClickHandler,
@@ -48,9 +47,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        Timber.tag(TAG);
-        Timber.d("onCreate called");
-        Timber.d("is savedInstance null? %b", savedInstanceState == null);
         addFragmentToScreen(PreferenceUtils.getShouldShowFavourites(this));
 
         attachFragmentByTag(MovieFavouritesFragment.TAG, savedInstanceState);
@@ -74,9 +70,7 @@ public class MainActivity extends AppCompatActivity
         final int viewId = layout.getId();
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        if (// fragmentManager.findFragmentById(viewId) == null &&
-                null == fragmentManager.findFragmentByTag(tag)) {
-            Timber.d("fragment readded %s", tag);
+        if (null == fragmentManager.findFragmentByTag(tag)) {
             final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(viewId, fragment, tag);
             fragmentTransaction.commit();
@@ -164,6 +158,5 @@ public class MainActivity extends AppCompatActivity
                 fragmentManager.findFragmentByTag(MovieBrowseFragment.TAG);
         fragmentManager.putFragment(outState, MovieBrowseFragment.TAG, browseFragment);
         fragmentManager.putFragment(outState, MovieFavouritesFragment.TAG, favouritesFragment);
-        Timber.d("onSaveInstanceState called in MainActivity");
     }
 }

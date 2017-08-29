@@ -27,4 +27,6 @@ public interface MovieRepository {
     void saveFavourite(@NonNull Movie movie);
 
     Observable<List<Movie>> loadMoviesFromCache();
+
+    Observable<Movie> loadMovieFromCache(int id);
 }

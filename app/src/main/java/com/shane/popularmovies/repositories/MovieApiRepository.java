@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.shane.popularmovies.data.MovieContract.MovieEntry;
+import com.shane.popularmovies.exceptions.ModelNotFoundException;
 import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.models.MovieResponse;
 import com.shane.popularmovies.models.Review;
@@ -99,27 +100,50 @@ public class MovieApiRepository implements MovieRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    @Override
+    public Observable<Movie> loadMovieFromCache(int id) {
+        return readMovieFromDatabase(id).map(CURSOR_MOVIE_MAPPER)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Observable<Cursor> readMovieFromDatabase(int id) {
+        return Observable.create(observer -> {
+            final Cursor cursor = context.getContentResolver().query(MovieEntry.buildMovieUriWithId(id), null, null, null, null);
+            if (cursor == null || cursor.getCount() != 1) throw new ModelNotFoundException();
+            observer.onNext(cursor);
+        });
+    }
+
+    private static Function<Cursor, Movie> CURSOR_MOVIE_MAPPER = cursor -> {
+        final Movie movie = mapMovie(cursor);
+        cursor.close();
+        return movie;
+    };
+
     private Observable<Cursor> readMoviesFromDatabase() {
         return Observable.create(observer -> {
-            Cursor cursor = context.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
+            final Cursor cursor = context.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
             observer.onNext(cursor);
         });
     }
 
     private static Function<Cursor, List<Movie>> CURSOR_MOVIE_LIST_MAPPER = cursor -> {
         List<Movie> movies = new ArrayList<>();
-        while (cursor.moveToNext()) {
-            final int id = cursor.getInt(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_ID));
-            final String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
-            final String posterPath = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH));
-            final String synopsis = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_SYNOPSIS));
-            final double ratings = cursor.getDouble(cursor.getColumnIndex(MovieEntry.COLUMN_RATINGS));
-
-            final String releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
-
-            final Movie movie = new Movie(id, title, posterPath, synopsis, ratings, releaseDate);
-            movies.add(movie);
-        }
+        while (cursor.moveToNext()) movies.add(mapMovie(cursor));
+        cursor.close();
         return movies;
     };
+
+    private static Movie mapMovie(@NonNull Cursor cursor) {
+        final int id = cursor.getInt(cursor.getColumnIndex(MovieEntry.COLUMN_MOVIE_ID));
+        final String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
+        final String posterPath = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH));
+        final String synopsis = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_SYNOPSIS));
+        final double ratings = cursor.getDouble(cursor.getColumnIndex(MovieEntry.COLUMN_RATINGS));
+
+        final String releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+
+        return new Movie(id, title, posterPath, synopsis, ratings, releaseDate);
+    }
 }

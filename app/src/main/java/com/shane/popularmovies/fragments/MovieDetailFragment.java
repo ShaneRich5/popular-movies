@@ -2,6 +2,7 @@ package com.shane.popularmovies.fragments;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -55,6 +56,8 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static android.R.attr.id;
+
 public class MovieDetailFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
 
@@ -79,11 +82,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     private MovieRepository movieRepository;
     private Movie movie;
 
-    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
-        final Cursor cursor = query.run();
-        return ! (cursor == null || cursor.getCount() <= 0);
-    };
-
     public static MovieDetailFragment newInstance(@NonNull Movie movie) {
         MovieDetailFragment fragment = new MovieDetailFragment();
         Bundle arguments = new Bundle();
@@ -103,9 +101,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_movie, container, false);
         ButterKnife.bind(this, view);
-        Timber.tag(TAG);
-
-        if (savedInstanceState == null) Timber.d("Null in onCreate");
         return view;
     }
 
@@ -140,12 +135,32 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         trailerRecyclerView.setAdapter(trailerAdapter);
         reviewRecyclerView.setAdapter(reviewAdapter);
 
-        checkIfMovieIsFavoured();
 
+        final String selectQuery = String.format(Locale.getDefault(),
+                "SELECT * FROM %s WHERE %s LIKE '%d'",
+                MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
 
+        MovieDbHelper movieDbHelper = new MovieDbHelper(getContext());
+        SqlBrite sqlBrite = new SqlBrite.Builder().build();
+        BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
+        database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
+                .map(IS_FAVOURITE_MAPPER)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isFavourite -> {
+                    Timber.d("(is favourite) movie: %b", isFavourite);
+                    setIsFavouriteView(isFavourite);
+                    favouriteFab.setVisibility(View.VISIBLE);
+                    Timber.d("(database) %s", movie.toString());
+                }, Timber::e);
     }
 
-
+    static Function<SqlBrite.Query, Boolean> IS_FAVOURITE_MAPPER = query -> {
+        final Cursor cursor = query.run();
+        if (cursor == null) return false;
+        int count = cursor.getCount();
+        cursor.close();
+        return (count > 0);
+    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -201,17 +216,17 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
     }
 
     private void checkIfMovieIsFavoured() {
-        final String selectQuery = String.format(Locale.getDefault(),
-                "SELECT * FROM %s WHERE %s LIKE '%d'",
-                MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID, movie.getId());
-
-        MovieDbHelper movieDbHelper = new MovieDbHelper(getContext());
-        SqlBrite sqlBrite = new SqlBrite.Builder().build();
-        BriteDatabase database = sqlBrite.wrapDatabaseHelper(movieDbHelper, Schedulers.io());
-        database.createQuery(MovieEntry.TABLE_NAME, selectQuery)
-                .map(IS_FAVOURITE_MAPPER)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setIsFavouriteView, Timber::e);
+        final Cursor cursor = getContext().getContentResolver()
+                .query(MovieEntry.buildMovieUriWithId(id), null, null, null, null);
+        Timber.d("Cursor check");
+        DatabaseUtils.dumpCursor(cursor);
+        if (null == cursor) {
+            Toast.makeText(getContext(), "Error verifying favourites", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        favouriteFab.setVisibility(View.VISIBLE);
+        setIsFavouriteView(cursor.getCount() >= 1);
+        cursor.close();
     }
 
     private void fetchReviews(int id) {
@@ -272,13 +287,12 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         outState.putParcelableArrayList(TRAILER_LIST_ITEMS, new ArrayList<>(trailers));
         outState.putParcelableArrayList(REVIEW_LIST_ITEMS, new ArrayList<>(reviews));
         outState.putParcelable(SCROLL_POSITION, scrollView.onSaveInstanceState());
-        Timber.d("(Saved) Position: %d %d", scrollView.getScrollX(), scrollView.getScrollY());
+        Timber.d("(saved) Position: %d %d", scrollView.getScrollX(), scrollView.getScrollY());
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        if (savedInstanceState != null) restoreState(savedInstanceState);
         int id = movie.getId();
 
         if (savedInstanceState == null) {
@@ -289,9 +303,8 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         }
 
         final Parcelable scrollState = savedInstanceState.getParcelable(SCROLL_POSITION);
-
-        List<Trailer> trailers = savedInstanceState.getParcelableArrayList(TRAILER_LIST_ITEMS);
-        List<Review> reviews = savedInstanceState.getParcelableArrayList(REVIEW_LIST_ITEMS);
+        final List<Trailer> trailers = savedInstanceState.getParcelableArrayList(TRAILER_LIST_ITEMS);
+        final List<Review> reviews = savedInstanceState.getParcelableArrayList(REVIEW_LIST_ITEMS);
 
         if (trailers == null) fetchTrailers(id);
         else trailerAdapter.setTrailers(trailers);
@@ -300,9 +313,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
         else reviewAdapter.setReviews(reviews);
 
         if (scrollState != null) scrollView.onRestoreInstanceState(scrollState);
-    }
-
-    private void restoreState(@NonNull Bundle savedInstanceState) {
     }
 
     private void handleReviewsLoaded(@NonNull List<Review> reviews) {
