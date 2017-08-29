@@ -40,4 +40,6 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SQL_DELETE_MOVIES);
         onCreate(sqLiteDatabase);
     }
+
+
 }
