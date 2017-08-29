@@ -46,6 +46,11 @@ public class MovieFavouritesFragment extends MovieListFragment {
                 ));
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadMoviesFromCache();
+    }
 
     private void handleLoadComplete() {
         loadingProgressBar.setVisibility(View.GONE);
