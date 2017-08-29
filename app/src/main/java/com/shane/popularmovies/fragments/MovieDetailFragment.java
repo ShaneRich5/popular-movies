@@ -2,7 +2,6 @@ package com.shane.popularmovies.fragments;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -48,8 +47,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
-
-import static android.R.attr.id;
 
 public class MovieDetailFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
@@ -132,7 +129,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                 .query(MovieEntry.buildMovieUriWithId(movie.getId()), null, null, null, null);
 
         if (null != cursor) {
-            DatabaseUtils.dumpCursor(cursor);
             boolean isFavourite = cursor.getCount() > 0;
             Timber.d("(is favourite) movie: %b", isFavourite);
             setIsFavouriteView(isFavourite);
@@ -193,20 +189,6 @@ public class MovieDetailFragment extends Fragment implements TrailerAdapter.Trai
                 .load(movie.buildPosterUrl())
                 .error(R.mipmap.ic_launcher)
                 .into(posterImageView);
-    }
-
-    private void checkIfMovieIsFavoured() {
-        final Cursor cursor = getContext().getContentResolver()
-                .query(MovieEntry.buildMovieUriWithId(id), null, null, null, null);
-        Timber.d("Cursor check");
-        DatabaseUtils.dumpCursor(cursor);
-        if (null == cursor) {
-            Toast.makeText(getContext(), "Error verifying favourites", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        favouriteFab.setVisibility(View.VISIBLE);
-        setIsFavouriteView(cursor.getCount() >= 1);
-        cursor.close();
     }
 
     private void fetchReviews(int id) {
